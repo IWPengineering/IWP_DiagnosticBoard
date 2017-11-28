@@ -4,11 +4,7 @@
  *
  * Created on November 27, 2017, 3:52 PM
  */
-#include <stdio.h>
-#include <stdlib.h>
-#include <math.h>
-#include <xc.h>
-#include <string.h>
+
 // CONFIG1L
 #pragma config FEXTOSC = LP     // External Oscillator mode Selection bits (LP (crystal oscillator) optimized for 32.768 kHz; PFM set to low power)
 #pragma config RSTOSC = LFINTOSC// Power-up default value for COSC bits (Low-Frequency Oscillator)
@@ -69,9 +65,33 @@
 #pragma config EBTRB = OFF      // Boot Block Table Read Protection bit (Boot Block (000000-0007FFh) not protected from table reads executed in other blocks)
 
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
 #include <xc.h>
+#include <string.h>
+#include <p18F26K40.h>
 
+int __attribute__ ((space(eedata))) eeData; // Global variable located in EEPROM
 
+// ****************************************************
+//            Constants
+// *****************************************************
+
+    const int xAxis = 11; // analog pin connected to x axis of accelerometer ** MAY NEED TO CHANGE
+    const int yAxis = 12; // analog pin connected to y axis of accelerometer ** MAY NEED TO CHANGE
+    const int signedNumAdjustADC = 511; // Used to divide the total range of the output of the 10 bit ADC into positive and negative range.
+    const int upstrokeInterval = 10; // The number of milliseconds to delay before reading the upstroke
+    const float PI = 3.141592;
+    const float angleThresholdSmall = 0.1; //number close to zero to determine if handle is moving w/o interpreting accelerometer noise as movement.
+ 
+// *****************************************************
+//              Function Prototype
+// *****************************************************
+    
+void ClearWatchDogTimer(void);
+void EEProm_Write_Float(unsigned int ee_addr, void *obj_p);
+float getHandleAngle();
 
 /*********************************************************************
  * Function: ClearWatchDogTimer()
@@ -88,17 +108,66 @@
  void ClearWatchDogTimer(void){
      ClrWdt();
  }
+void EEProm_Write_Float(unsigned int ee_addr, void *obj_p) {
 
+        unsigned int *p = obj_p;
+        unsigned int offset;
+        NVMCON = 0x4004;
+        ee_addr = ee_addr*4;  // floats use 4 address locations
+
+        // Write the first half of the float
+         // Set up a pointer to the EEPROM location to be erased
+        TBLPAG = __builtin_tblpage(&eeData); // Initialize EE Data page pointer
+        offset = __builtin_tbloffset(&eeData) + (ee_addr & 0x01ff); // Initialize lower word of address
+        __builtin_tblwtl(offset, *p); // Write EEPROM data to write latch
+         asm volatile ("disi #5"); // Disable Interrupts For 5 Instructions
+        __builtin_write_NVM(); // Issue Unlock Sequence & Start Write Cycle
+        while(NVMCONbits.WR==1); // Optional: Poll WR bit to wait for
+        // first half of float write sequence to complete
+
+        // Write the second half of the float
+        p++;
+        ee_addr = ee_addr + 2;
+        TBLPAG = __builtin_tblpage(&eeData); // Initialize EE Data page pointer
+        offset = __builtin_tbloffset(&eeData) + (ee_addr & 0x01ff); // Initialize lower word of address
+        __builtin_tblwtl(offset, *p); // Write EEPROM data to write latch
+         asm volatile ("disi #5"); // Disable Interrupts For 5 Instructions
+        __builtin_write_NVM(); // Issue Unlock Sequence & Start Write Cycle
+        while(NVMCONbits.WR==1); // Optional: Poll WR bit to wait for
+        // second half of float write sequence to complete
+    
+    }
+float getHandleAngle() {
+
+        signed int xValue = readAdc(xAxis) - signedNumAdjustADC; 
+        signed int yValue = readAdc(yAxis) - signedNumAdjustADC; 
+        float angle = atan2(yValue, xValue) * (180 / PI); //returns angle in degrees 
+        // Calculate and return the angle of the pump handle
+        if (angle > 20) {
+            angle = 20.0;
+        } else if (angle < -30) {
+            angle = -30.0;
+        }
+        angle10 = angle9;
+        angle9 = angle8;
+        angle8 = angle7;
+        angle7 = angle6;
+        angle6 = angle5;
+        angle5 = angle4;
+        angle4 = angle3;
+        angle3 = angle2;
+        angle2 = angle1;
+        angle1 = angle;
+
+        float averageAngle = (angle1 + angle2 + angle3 + angle4 + angle5 + angle6 + angle7 + angle8 + angle9 + angle10) / 10.0;
+
+        return averageAngle;
+        //return angle;
+    }
 void main(void) {
     int __attribute__ ((space(eedata))) eeData; // Global variable located in EEPROM
     
-    const int xAxis = 11; // analog pin connected to x axis of accelerometer ** MAY NEED TO CHANGE
-    const int yAxis = 12; // analog pin connected to y axis of accelerometer ** MAY NEED TO CHANGE
-    const int signedNumAdjustADC = 511; // Used to divide the total range of the output of the 10 bit ADC into positive and negative range.
-    const int upstrokeInterval = 10; // The number of milliseconds to delay before reading the upstroke
-    const float PI = 3.141592;
-    const float angleThresholdSmall = 0.1; //number close to zero to determine if handle is moving w/o interpreting accelerometer noise as movement.
-    
+   
     int handleMovement = 0; // Either 1 or no 0 if the handle moving upward
 	int timeOutStatus = 0; // Used to keep track of the water prime timeout
     
@@ -129,63 +198,9 @@ void main(void) {
     
     ClearWatchDogTimer(); // Changed from ClearWatchDogTime() which one is correct? )
     
-    void EEProm_Write_Float(unsigned int ee_addr, void *obj_p) {
-
-        unsigned int *p = obj_p;
-        unsigned int offset;
-        NVMCON = 0x4004;
-        ee_addr = ee_addr*4;  // floats use 4 address locations
-
-        // Write the first half of the float
-         // Set up a pointer to the EEPROM location to be erased
-        TBLPAG = __builtin_tblpage(&eeData); // Initialize EE Data page pointer
-        offset = __builtin_tbloffset(&eeData) + (ee_addr & 0x01ff); // Initialize lower word of address
-        __builtin_tblwtl(offset, *p); // Write EEPROM data to write latch
-         asm volatile ("disi #5"); // Disable Interrupts For 5 Instructions
-        __builtin_write_NVM(); // Issue Unlock Sequence & Start Write Cycle
-        while(NVMCONbits.WR==1); // Optional: Poll WR bit to wait for
-        // first half of float write sequence to complete
-
-        // Write the second half of the float
-        p++;
-        ee_addr = ee_addr + 2;
-        TBLPAG = __builtin_tblpage(&eeData); // Initialize EE Data page pointer
-        offset = __builtin_tbloffset(&eeData) + (ee_addr & 0x01ff); // Initialize lower word of address
-        __builtin_tblwtl(offset, *p); // Write EEPROM data to write latch
-         asm volatile ("disi #5"); // Disable Interrupts For 5 Instructions
-        __builtin_write_NVM(); // Issue Unlock Sequence & Start Write Cycle
-        while(NVMCONbits.WR==1); // Optional: Poll WR bit to wait for
-        // second half of float write sequence to complete
     
-    }
     
-    float getHandleAngle() {
-
-        signed int xValue = readAdc(xAxis) - signedNumAdjustADC; 
-        signed int yValue = readAdc(yAxis) - signedNumAdjustADC; 
-        float angle = atan2(yValue, xValue) * (180 / PI); //returns angle in degrees 
-        // Calculate and return the angle of the pump handle
-        if (angle > 20) {
-            angle = 20.0;
-        } else if (angle < -30) {
-            angle = -30.0;
-        }
-        angle10 = angle9;
-        angle9 = angle8;
-        angle8 = angle7;
-        angle7 = angle6;
-        angle6 = angle5;
-        angle5 = angle4;
-        angle4 = angle3;
-        angle3 = angle2;
-        angle2 = angle1;
-        angle1 = angle;
-
-        float averageAngle = (angle1 + angle2 + angle3 + angle4 + angle5 + angle6 + angle7 + angle8 + angle9 + angle10) / 10.0;
-
-        return averageAngle;
-        //return angle;
-    }
+    
     
     int i = 0; 
     
