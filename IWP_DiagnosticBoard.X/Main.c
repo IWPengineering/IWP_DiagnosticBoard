@@ -95,8 +95,10 @@ void main(void) {
     const int xAxis = 11; // analog pin connected to x axis of accelerometer ** MAY NEED TO CHANGE
     const int yAxis = 12; // analog pin connected to y axis of accelerometer ** MAY NEED TO CHANGE
     const int signedNumAdjustADC = 511; // Used to divide the total range of the output of the 10 bit ADC into positive and negative range.
+    const int upstrokeInterval = 10; // The number of milliseconds to delay before reading the upstroke
     const float PI = 3.141592;
-
+    const float angleThresholdSmall = 0.1; //number close to zero to determine if handle is moving w/o interpreting accelerometer noise as movement.
+    
     int handleMovement = 0; // Either 1 or no 0 if the handle moving upward
 	int timeOutStatus = 0; // Used to keep track of the water prime timeout
     
@@ -109,7 +111,10 @@ void main(void) {
 	float leakRatePrevious = 0; // Stores the previous Leak Rate incase if someone stats to pump before leakage can be measured
 	float upStrokePrimeMeters = 0; // Stores the upstroke in meters
 	float leakRate = 0; // Rate at which water is leaking from the rising main
-	int currentDay;
+    long leakRateTimeOut = 3000; // Equivalent to 3 seconds (in "upstrokeInterval" millisecond intervals); 
+
+    int currentDay;
+    char never_primed = 0;  //set to 1 if the priming loop is exited without detecting water
     
     float angle1 = 0;
     float angle2 = 0;
@@ -182,6 +187,8 @@ void main(void) {
         //return angle;
     }
     
+    int i = 0; 
+    
     if((angleDelta > (-1 * angleThresholdSmall)) && (angleDelta < angleThresholdSmall)){   //Determines if the handle is at rest
 		i++; //increase i while handle is stationary
 	}
@@ -201,7 +208,7 @@ void main(void) {
     i = 0;  
     
     anglePrevious = getHandleAngle(); // Keep track of how many milliseconds have passed
-
+    int volumeLoopCounter = 15; // 150 ms                           //number of zero movement cycles before loop ends
     long leakDurationCounter = volumeLoopCounter;   // The volume loop has 150 milliseconds of delay 
        // if no water or no handle movement before entry.
     while (readWaterSensor()){
@@ -240,7 +247,7 @@ void main(void) {
     if (upStrokeExtract < 900){  // If someone has not pumped at least 10 liters we don't want to measure leak rate
 
     // this is to prevent a splash from a slug of water hitting the WPS and being interpreted as leak
-    // when it is just receeding back down the pipe when momentum goes away.
+    // when it is just receding back down the pipe when momentum goes away.
     //  upStrokeExtractis in degrees at this point
        leakCondition = 5;
     }
