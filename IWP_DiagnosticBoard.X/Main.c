@@ -232,7 +232,6 @@ if (upStrokeExtract < 900){  // If someone has not pumped at least 10 liters we 
        leakCondition = 5;
 }
 
-sendDebugMessage("The Leak condition is ", leakCondition);  //Debug
 switch (leakCondition){
 	case 1:
 		leakRate = leakRatePrevious; // They started pumping again so can't calculate a new leak rate, use the last one when calculating volume pumped
@@ -287,7 +286,6 @@ while ((timeOutStatus < waterPrimeTimeOut) && !readWaterSensor()) {
 	} 
             if(i == 100) {  // They quit trying for at least 1 second
                 never_primed = 1;
-                sendDebugMessage("        Stopped trying to prime   ", upStrokePrime);  //Debug
                 break;
             }
             timeOutStatus++; // we will wait for up to waterPrimeTimeOut of pumping
@@ -304,17 +302,12 @@ while ((timeOutStatus < waterPrimeTimeOut) && !readWaterSensor()) {
 
 ********************Vol calc************
         volumeEvent = (MKII * upStrokeExtract);     //[L/rad][rad]=[L] 
-        sendDebugMessage("Liters Pumped ", volumeEvent);  //Debug
         
 		volumeEvent -= (leakRate * ((extractionDurationCounter * upstrokeInterval) / 1000.0)); //[L/s][s]=[L]
         if(volumeEvent < 0)
         {
             volumeEvent = 0; // we can't pump negative volume
         }
-		// organize flow into 2 hours bins
-        // The hour was read at the start of the handle movement routine       
-        sendDebugMessage("Volume Event = ", volumeEvent);  //Debug
-        sendDebugMessage("  for time slot ", hour);  //Debug
 
        
 		switch (hour / 2)
