@@ -110,7 +110,7 @@ void main(void) {
     float angle9 = 0;
     float angle10 = 0;
     
-    ClearWatchDogTime();
+    ClearWatchDogTimer(); // Changed from ClearWatchDogTime() which one is correct? )
     
     void EEProm_Write_Float(unsigned int ee_addr, void *obj_p) {
 
