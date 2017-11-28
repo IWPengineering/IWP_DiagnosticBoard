@@ -84,7 +84,16 @@ int __attribute__ ((space(eedata))) eeData; // Global variable located in EEPROM
     const int upstrokeInterval = 10; // The number of milliseconds to delay before reading the upstroke
     const float PI = 3.141592;
     const float angleThresholdSmall = 0.1; //number close to zero to determine if handle is moving w/o interpreting accelerometer noise as movement.
- 
+    float angle1 = 0;
+    float angle2 = 0;
+    float angle3 = 0;
+    float angle4 = 0;
+    float angle5 = 0;
+    float angle6 = 0;
+    float angle7 = 0;
+    float angle8 = 0;
+    float angle9 = 0;
+    float angle10 = 0;
 // *****************************************************
 //              Function Prototype
 // *****************************************************
@@ -92,6 +101,12 @@ int __attribute__ ((space(eedata))) eeData; // Global variable located in EEPROM
 void ClearWatchDogTimer(void);
 void EEProm_Write_Float(unsigned int ee_addr, void *obj_p);
 float getHandleAngle();
+int EEProm_Read_Int(int addr);
+void EEProm_Read_Float(int ee_addr, void *obj_p);
+int readWaterSensor(void);
+void delayMs(int ms);
+char BcdToDec(char val);
+
 
 /*********************************************************************
  * Function: ClearWatchDogTimer()
@@ -100,14 +115,28 @@ float getHandleAngle();
  * Overview: You can use just ClrWdt() as a command.  However, I read in a forum 
  *           http://www.microchip.com/forums/m122062.aspx
  *           that since ClrWdt() expands to an asm command, the presence of the 
-  *          asm will stop the compiler from optimizing any routine that it is a 
-  *          part of.  Since I want to call this in Main, that would be a problem
+ *          asm will stop the compiler from optimizing any routine that it is a 
+ *          part of.  Since I want to call this in Main, that would be a problem
  * Note: Library
  * TestDate: 1-2-2017
  ********************************************************************/
- void ClearWatchDogTimer(void){
+void ClearWatchDogTimer(void){
      ClrWdt();
- }
+}
+
+/*********************************************************************
+ * Function: EEProm_Write_Float(unsigned int ee_addr, void *obj_p)
+ * Input: ee_addr - the location to write to relative to the start of EEPROM
+ *                  it is assumed that you are referring to the # of the float 
+ *                  you want to write.  The first is 0, the next is 1 etc.
+ *        *obj_p - the address of the variable which contains the float
+ *                  to be written to EEPROM
+ * Output: none
+ * Overview: A single float is written to EEPROM start + offset.  This is done by
+ *           writing the contents of the float address provided, one int at a time
+ * Note: Library
+ * TestDate: 12-26-2016
+ ********************************************************************/
 void EEProm_Write_Float(unsigned int ee_addr, void *obj_p) {
 
         unsigned int *p = obj_p;
@@ -136,7 +165,22 @@ void EEProm_Write_Float(unsigned int ee_addr, void *obj_p) {
         while(NVMCONbits.WR==1); // Optional: Poll WR bit to wait for
         // second half of float write sequence to complete
     
-    }
+}
+
+/*********************************************************************
+ * Function: getHandleAngle()
+ * Input: None
+ * Output: Float
+ * Overview: Returns the average angle of the pump. The accelerometer
+should be oriented on the pump handle so that when the
+pump handle (the side the user is using) is down (water
+present), the angle is positive. When the pump handle
+(the side the user is using) is up (no water present),
+the angle is negative.Gets a snapshot of the current sensor values.
+ * Note: Library
+ * NOTE2: It turns out that averaging the handle angles would be the most accurate way to report pumping
+ * TestDate: TBD
+ ********************************************************************/
 float getHandleAngle() {
 
         signed int xValue = readAdc(xAxis) - signedNumAdjustADC; 
@@ -163,7 +207,120 @@ float getHandleAngle() {
 
         return averageAngle;
         //return angle;
+}
+
+/*********************************************************************
+ * Function: int EEProm_Read_Int(int addr);
+ * Input: addr - the location to read from relative to the start of EEPROM
+ * Output: int value read from EEPROM
+ * Overview: A single int is read from EEPROM start + offset and is returned
+ * Note: Library
+ * TestDate: 12-26-2016
+ ********************************************************************/
+int EEProm_Read_Int(int addr){
+    int data; // Data read from EEPROM
+    unsigned int offset;
+ 
+    // Set up a pointer to the EEPROM location to be erased
+    TBLPAG = __builtin_tblpage(&eeData); // Initialize EE Data page pointer
+    offset = __builtin_tbloffset(&eeData) + (2* addr & 0x01ff); // Initialize lower word of address
+    data = __builtin_tblrdl(offset); // Write EEPROM data to write latch
+    return data;
+}
+
+/*********************************************************************
+ * Function: EEProm_Read_Float(unsigned int ee_addr, void *obj_p)
+ * Input: ee_addr - the location to read from relative to the start of EEPROM
+ *        *obj_p - the address of the variable to be updated (assumed to be a float)
+ * Output: none
+ * Overview: A single float is read from EEPROM start + offset.  This is done by
+ *           updating the contents of the float address provided, one int at a time
+ * Note: Library
+ * TestDate: 12-26-2016
+ ********************************************************************/
+void EEProm_Read_Float(int ee_addr, void *obj_p){
+    unsigned int *p = obj_p; // point to the float to be updated
+    unsigned int offset; 
+    ee_addr == ee_addr*4; // floats use 4 address locations
+    // Read and update the first half of the float
+    // Set up a pointer to the EEPROM location to be erased
+    TBLPAG = __builtin_tblpage(&eeData); // Initialize EE Data page pointer
+    offset = __builtin_tbloffset(&eeData) + (ee_addr & 0x01ff); // Initialize lower word of address 
+    *p = __builtin_tblrdl(offset); // Write EEPROM data to write latch 
+    // First half read is complete
+
+    p++; 
+    ee_addr = ee_addr+2; 
+
+    TBLPAG = __builtin_tblpage(&eeData); // Initialize EE Data page pointer
+    offset = __builtin_tbloffset(&eeData) + (ee_Addr & 0x01ff); // Initialize lower word of address 
+    *p = __builtin_tblrdl(offset); // Write EEPROM data to write latch
+    // second half read is complete
+}
+
+/*********************************************************************
+ * Function: readWaterSensor
+ * Input: None
+ * Output: pulseWidth
+ * Overview: RB5 is one water sensor, start at beginning of positive pulse
+ * Note: Pic Dependent
+ * TestDate: Not tested as of 03-05-2015
+ ********************************************************************/ 
+int readWaterSensor(void) { // RB5 is one water sensor
+    // turn on and off in the Main loop so the 555 has time to stabelize 
+   // digitalPinSet(waterPresenceSensorOnOffPin, 1); //turns on the water presence sensor.
+   
+    delayMs(5);  //debug
+    if (digitalPinStatus(waterPresenceSensorPin) == 1) {
+        while (digitalPinStatus(waterPresenceSensorPin)) {
+        }; //make sure you start at the beginning of the positive pulse
     }
+    while (digitalPinStatus(waterPresenceSensorPin) == 0) {
+    }; //wait for rising edge
+    int prevICTime = TMR1; //get time at start of positive pulse
+    while (digitalPinStatus(waterPresenceSensorPin)) {
+    };
+    int currentICTime = TMR1; //get time at end of positive pulse
+    long pulseWidth = 0;
+    if (currentICTime >= prevICTime) {
+        pulseWidth = (currentICTime - prevICTime);
+    } else {
+        pulseWidth = (currentICTime - prevICTime + 0x100000000);
+    }
+    
+    // digitalPinSet(waterPresenceSensorOnOffPin, 0); //turns off the water presence sensor.
+
+    //Check if this value is right
+    return (pulseWidth <= pulseWidthThreshold);
+}
+
+/*********************************************************************
+ * Function: delayMs()
+ * Input: milliseconds
+ * Output: None
+ * Overview: Delays the specified number of milliseconds
+ * Note: Depends on Clock speed. Pic Dependent
+ * TestDate: 05-20-14
+ ********************************************************************/
+void delayMs(int ms) {
+    int myIndex;
+    while (ms > 0) {
+        myIndex = 0;
+        while (myIndex < 667) {
+            myIndex++;
+        }
+        ms--;
+    }
+}
+
+//This function converts a BCD to DEC
+//Input: BCD Value
+//Returns: Hex Value
+
+char BcdToDec(char val) {
+    return ((val / 16 * 10) + (val % 16));
+}
+
 void main(void) {
     int __attribute__ ((space(eedata))) eeData; // Global variable located in EEPROM
     
@@ -194,13 +351,9 @@ void main(void) {
     float angle7 = 0;
     float angle8 = 0;
     float angle9 = 0;
-    float angle10 = 0;
+    float angle10 = 0; // *MAY NEED TO DELETE 
     
     ClearWatchDogTimer(); // Changed from ClearWatchDogTime() which one is correct? )
-    
-    
-    
-    
     
     int i = 0; 
     
@@ -392,69 +545,6 @@ void main(void) {
     if(hour/2 != active_volume_bin){
         SaveVolumeToEEProm();
     }
-
-        
-/********Save to EEPROM*********/
-int EEProm_Read_Int(int addr){
-    int data; // Data read from EEPROM
-    unsigned int offset;
- 
-    // Set up a pointer to the EEPROM location to be erased
-    TBLPAG = __builtin_tblpage(&eeData); // Initialize EE Data page pointer
-    offset = __builtin_tbloffset(&eeData) + (2* addr & 0x01ff); // Initialize lower word of address
-    data = __builtin_tblrdl(offset); // Write EEPROM data to write latch
-    return data;
-}
-
-void EEProm_Read_Float(int ee_addr, void *obj_p){
-    unsigned int *p = obj_p; // point to the float to be updated
-    unsigned int offset; 
-    ee_addr == ee_addr*4; // floats use 4 address locations
-    // Read and update the first half of the float
-    // Set up a pointer to the EEPROM location to be erased
-    TBLPAG = __builtin_tblpage(&eeData); // Initialize EE Data page pointer
-    offset = __builtin_tbloffset(&eeData) + (ee_addr & 0x01ff); // Initialize lower word of address 
-    *p = __builtin_tblrdl(offset); // Write EEPROM data to write latch 
-    // First half read is complete
-
-    p++; 
-    ee_addr = ee_addr+2; 
-
-    TBLPAG = __builtin_tblpage(&eeData); // Initialize EE Data page pointer
-    offset = __builtin_tbloffset(&eeData) + (ee_Addr & 0x01ff); // Initialize lower word of address 
-    *p = __builtin_tblrdl(offset); // Write EEPROM data to write latch
-    // second half read is complete
-}
-
-/************* Pump minder code*******/
-        
-int readWaterSensor(void) { // RB5 is one water sensor
-    // turn on and off in the Main loop so the 555 has time to stabelize 
-   // digitalPinSet(waterPresenceSensorOnOffPin, 1); //turns on the water presence sensor.
-   
-    delayMs(5);  //debug
-    if (digitalPinStatus(waterPresenceSensorPin) == 1) {
-        while (digitalPinStatus(waterPresenceSensorPin)) {
-        }; //make sure you start at the beginning of the positive pulse
-    }
-    while (digitalPinStatus(waterPresenceSensorPin) == 0) {
-    }; //wait for rising edge
-    int prevICTime = TMR1; //get time at start of positive pulse
-    while (digitalPinStatus(waterPresenceSensorPin)) {
-    };
-    int currentICTime = TMR1; //get time at end of positive pulse
-    long pulseWidth = 0;
-    if (currentICTime >= prevICTime) {
-        pulseWidth = (currentICTime - prevICTime);
-    } else {
-        pulseWidth = (currentICTime - prevICTime + 0x100000000);
-    }
-    
-    // digitalPinSet(waterPresenceSensorOnOffPin, 0); //turns off the water presence sensor.
-
-    //Check if this value is right
-    return (pulseWidth <= pulseWidthThreshold);
-}
 
                       
     return;
