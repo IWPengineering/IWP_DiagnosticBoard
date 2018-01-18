@@ -94,7 +94,6 @@ int __attribute__ ((space(eedata))) eeData; // Global variable located in EEPROM
     float angle8 = 0;
     float angle9 = 0;
     float angle10 = 0;
-    const int pulseWidthThreshold = 20; 
 // *****************************************************
 //              Function Prototype
 // *****************************************************
@@ -259,7 +258,7 @@ int __attribute__ ((space(eedata))) eeData; // Global variable located in EEPROM
 //    // second half read is complete
 //}
 //
-//*********************************************************************
+///*********************************************************************
 // * Function: readWaterSensor
 // * Input: None
 // * Output: pulseWidth
@@ -295,24 +294,24 @@ int __attribute__ ((space(eedata))) eeData; // Global variable located in EEPROM
 //    return (pulseWidth <= pulseWidthThreshold);
 //}
 //
-/*********************************************************************
- * Function: delayMs()
- * Input: milliseconds
- * Output: None
- * Overview: Delays the specified number of milliseconds
- * Note: Depends on Clock speed. Pic Dependent
- * TestDate: 05-20-14
- ********************************************************************/
-void delayMs(int ms) {
-    int myIndex;
-    while (ms > 0) {
-        myIndex = 0;
-        while (myIndex < 667) {
-            myIndex++;
-        }
-        ms--;
-    }
-}
+///*********************************************************************
+// * Function: delayMs()
+// * Input: milliseconds
+// * Output: None
+// * Overview: Delays the specified number of milliseconds
+// * Note: Depends on Clock speed. Pic Dependent
+// * TestDate: 05-20-14
+// ********************************************************************/
+//void delayMs(int ms) {
+//    int myIndex;
+//    while (ms > 0) {
+//        myIndex = 0;
+//        while (myIndex < 667) {
+//            myIndex++;
+//        }
+//        ms--;
+//    }
+//}
 //
 ////This function converts a BCD to DEC
 ////Input: BCD Value
@@ -326,33 +325,130 @@ void main(void) {
     int __attribute__ ((space(eedata))) eeData; // Global variable located in EEPROM
     
    
-//    int handleMovement = 0; // Either 1 or no 0 if the handle moving upward
-//	int timeOutStatus = 0; // Used to keep track of the water prime timeout
-//    
-//	float angleCurrent = 0; // Stores the current angle of the pump handle
-//	float anglePrevious = 0; // Stores the last recorded angle of the pump handle
-//	float angleDelta = 0; // Stores the difference between the current and previous angles
-//	float upStrokePrime = 0; // Stores the sum of the upstrokes for calculating the prime
-//	float upStrokeExtract = 0; // Stores the sum of the upstrokes for calculating volume
-//	float volumeEvent = 0; // Stores the volume extracted
-//	float leakRatePrevious = 0; // Stores the previous Leak Rate incase if someone stats to pump before leakage can be measured
-//	float upStrokePrimeMeters = 0; // Stores the upstroke in meters
-//	float leakRate = 0; // Rate at which water is leaking from the rising main
-//    long leakRateTimeOut = 3000; // Equivalent to 3 seconds (in "upstrokeInterval" millisecond intervals); 
-//
-//    int currentDay;
-//    char never_primed = 0;  //set to 1 if the priming loop is exited without detecting water
-//    
-//    float angle1 = 0;
-//    float angle2 = 0;
-//    float angle3 = 0;
-//    float angle4 = 0;
-//    float angle5 = 0;
-//    float angle6 = 0;
-//    float angle7 = 0;
-//    float angle8 = 0;
-//    float angle9 = 0;
-//    float angle10 = 0; // *MAY NEED TO DELETE  
+    int handleMovement = 0; // Either 1 or no 0 if the handle moving upward
+	int timeOutStatus = 0; // Used to keep track of the water prime timeout
+    
+	float angleCurrent = 0; // Stores the current angle of the pump handle
+	float anglePrevious = 0; // Stores the last recorded angle of the pump handle
+	float angleDelta = 0; // Stores the difference between the current and previous angles
+	float upStrokePrime = 0; // Stores the sum of the upstrokes for calculating the prime
+	float upStrokeExtract = 0; // Stores the sum of the upstrokes for calculating volume
+	float volumeEvent = 0; // Stores the volume extracted
+	float leakRatePrevious = 0; // Stores the previous Leak Rate incase if someone stats to pump before leakage can be measured
+	float upStrokePrimeMeters = 0; // Stores the upstroke in meters
+	float leakRate = 0; // Rate at which water is leaking from the rising main
+    long leakRateTimeOut = 3000; // Equivalent to 3 seconds (in "upstrokeInterval" millisecond intervals); 
+
+    int currentDay;
+    char never_primed = 0;  //set to 1 if the priming loop is exited without detecting water
+    
+    float angle1 = 0;
+    float angle2 = 0;
+    float angle3 = 0;
+    float angle4 = 0;
+    float angle5 = 0;
+    float angle6 = 0;
+    float angle7 = 0;
+    float angle8 = 0;
+    float angle9 = 0;
+    float angle10 = 0; // *MAY NEED TO DELETE  
+    
+    const float handleMovementThreshold = 5.0;
+    
+    int readAdc(int channel) //check with accelerometer
+{
+    switch (channel) {
+        case 0:
+            specifyAnalogPin(depthSensorPin, 1); //make depthSensor Analog
+            pinDirectionIO(depthSensorPin, 1);
+            pinSampleSelectRegister(depthSensorPin);
+            break;
+        case 2: //Currently unused, may be used in the future.
+            specifyAnalogPin(Pin4, 1); // makes Pin4 analog
+            pinDirectionIO(Pin4, 1); // Pin4 in an input
+            pinSampleSelectRegister(Pin4); // Connect Pin4 as the S/H input
+
+            //ANSBbits.ANSB0 = 1; // AN2 is analog
+            //TRISBbits.TRISB0 = 1; // AN2 is an input
+            //AD1CHSbits.CH0SA = 2; // Connect AN2 as the S/H input
+            break;
+        case 4:
+            specifyAnalogPin(rxPin, 1); // make rx analog
+            pinDirectionIO(rxPin, 1); // makes rxPin an input
+            pinSampleSelectRegister(rxPin); // Connect rxPin as the S/H input
+            //ANSBbits.ANSB2 = 1; // AN4 is analog
+            //TRISBbits.TRISB2 = 1; // AN4 is an input
+            //AD1CHSbits.CH0SA = 4; // Connect AN4 as the S/H input
+            break;
+        case 11:
+            specifyAnalogPin(xAxisAccelerometerPin, 1); // makes xAxis analog
+            pinDirectionIO(xAxisAccelerometerPin, 1); // makes xAxis an input
+            pinSampleSelectRegister(xAxisAccelerometerPin); // Connect xAxis as the S/H input
+            //ANSBbits.ANSB13 = 1; // AN11 is analog
+            //TRISBbits.TRISB13 = 1; // AN11 is an input
+            //AD1CHSbits.CH0SA = 11; //Connect AN11 as the S/H input (sample and hold)
+            break;
+        case 12:
+            specifyAnalogPin(yAxisAccelerometerPin, 1); // makes yAxis analog
+            pinDirectionIO(yAxisAccelerometerPin, 1); // makes yAxis an input
+            pinSampleSelectRegister(yAxisAccelerometerPin); // Connect yAxis as the S/H input
+            //PORTBbits.RB12 = 1; // AN12 is analog ***I changed this to ANSBbits.ANSBxx 03-31-2015
+            //TRISBbits.TRISB12 = 1; // AN12 is an input
+            //AD1CHSbits.CH0SA = 12; // Connect AN12 as the S/H input
+            break;
+        case 15:
+            specifyAnalogPin(batteryLevelPin, 1); // makes batteryLevelPin analog
+            pinDirectionIO(batteryLevelPin, 1); // makes batteryLevelPin an input
+            pinSampleSelectRegister(batteryLevelPin); // Connect batteryLevelPin
+            break;
+    }
+    AD1CON1bits.ADON = 1; // Turn on ADC
+    AD1CON1bits.SAMP = 1;
+    while (!AD1CON1bits.DONE) {
+    }
+    unsigned int adcValue = ADC1BUF0;
+    return adcValue;
+    
+    ***********************************
+    float getHandleAngle() {                //This is from Utilities
+
+    signed int xValue = readAdc(xAxis) - signedNumAdjustADC; 
+    signed int yValue = readAdc(yAxis) - signedNumAdjustADC; 
+    float angle = atan2(yValue, xValue) * (180 / PI); //returns angle in degrees 06-20-2014
+    // Calculate and return the angle of the pump handle
+    if (angle > 20) {
+        angle = 20.0;
+    } else if (angle < -30) {
+        angle = -30.0;
+    }
+    angle10 = angle9;
+    angle9 = angle8;
+    angle8 = angle7;
+    angle7 = angle6;
+    angle6 = angle5;
+    angle5 = angle4;
+    angle4 = angle3;
+    angle3 = angle2;
+    angle2 = angle1;
+    angle1 = angle;
+
+    float averageAngle = (angle1 + angle2 + angle3 + angle4 + angle5 + angle6 + angle7 + angle8 + angle9 + angle10) / 10.0;
+
+    return averageAngle;
+    
+    ******************************************************************************************8
+    float newAngle = getHandleAngle();     //This is from main
+			float deltaAngle = newAngle - anglePrevious;
+			if(deltaAngle < 0) {
+				deltaAngle *= -1;
+			}
+            if(deltaAngle > handleMovementThreshold){            // The total movement of the handle from rest has been exceeded
+				//handleMovement = 1;      //Instead of handleMovement, we light up LED.
+            }
+    
+            
+               
+                
     // Initialize
     
     // Clear any data
