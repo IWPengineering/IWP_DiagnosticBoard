@@ -97,6 +97,82 @@ void pinDirectionIO(int pin, int io) { // 1 is an input, 0 is an output
 
 void digitalPinSet(int pin, int set) // 1 for high, 0 for low
 {
+    // Pin 1 can't change direction
+    if (pin == 2) {
+        TRISAbits.TRISA0 = set;
+    }
+    else if (pin == 3) {
+        TRISAbits.TRISA1 = set;
+    }
+    else if (pin == 4) {
+        TRISAbits.TRISA2 = set;
+    }
+    else if (pin == 5) { // WPS_OUT
+        TRISAbits.TRISA3 = set;
+    }
+    else if (pin == 6) { // ADXL_335_X
+        TRISAbits.TRISA4 = set;
+    }
+    else if (pin == 7) { // ADXL_335_Y
+        TRISAbits.TRISA5 = set; 
+    }
+    // Pin8 -  VSS - do nothing
+    else if (pin == 9) {
+        TRISAbits.TRISA7 = set;
+    }
+    else if (pin == 10) { // Push button 
+        TRISAbits.TRISA6 = set;
+    }
+    else if (pin == 11) { // EEPROM (CS with bar) NEED TO CHECK
+        TRISCbits.TRISC0 = set;
+    }
+    else if (pin == 12) { // PIC_PIN4
+        TRISCbits.TRISC1 = set;
+    }
+    else if (pin == 13) { // PIC_PIN5
+        TRISCbits.TRISC2 = set;
+    }
+    else if (pin == 14) { // EEPROM SCK NEED TO CHECK
+        TRISCbits.TRISC3 = set; 
+    }
+    else if (pin == 15) { // EEPROM SO NEED TO CHECK 
+        TRISCbits.TRISC4 = set;
+    }
+    else if (pin == 16) { // EEPROM SI NEED TO CHECK 
+        TRISCbits.TRISC5 = set;
+    }
+    else if (pin == 17) { // TX (input from control board)
+        TRISCbits.TRISC6 = set; 
+    }
+    else if (pin == 18) { // RX (output to control board)
+        TRISCbits.TRISC7 = set;
+    }
+    // Pin 19 VSS
+    // Pin 20 VDD
+    else if (pin == 21) { // PICKIT_5
+        TRISBbits.TRISB0 = set;
+    }
+    else if (pin == 22) { // PICKIT_4
+        TRISBbits.TRISB1 = set;
+    }
+    else if (pin == 23) { // PIC_PIN12
+        TRISBbits.TRISB2 = set; 
+    }
+    else if (pin == 24) { // LED4
+        TRISBbits.TRISB3 = set;
+    }
+    else if (pin == 25) { // LED5
+        TRISBbits.TRISB4 = set;
+    }
+    else if (pin == 26) { // LED1
+        TRISBbits.TRISB5 = set;
+    }
+    else if (pin == 27) { // LED2
+        TRISBbits.TRISB6 = set;
+    }
+    else if (pin == 28) { // LED3
+        TRISBbits.TRISB7 = set;
+    }
 //	if (pin == 1)
 //	{
 //		PORTAbits.RA5 = set;
