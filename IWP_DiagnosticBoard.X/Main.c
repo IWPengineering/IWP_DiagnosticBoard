@@ -94,6 +94,7 @@ int __attribute__ ((space(eedata))) eeData; // Global variable located in EEPROM
     float angle8 = 0;
     float angle9 = 0;
     float angle10 = 0;
+    const int pulseWidthThreshold = 20; 
 // *****************************************************
 //              Function Prototype
 // *****************************************************
@@ -258,7 +259,7 @@ int __attribute__ ((space(eedata))) eeData; // Global variable located in EEPROM
 //    // second half read is complete
 //}
 //
-///*********************************************************************
+//*********************************************************************
 // * Function: readWaterSensor
 // * Input: None
 // * Output: pulseWidth
@@ -294,24 +295,24 @@ int __attribute__ ((space(eedata))) eeData; // Global variable located in EEPROM
 //    return (pulseWidth <= pulseWidthThreshold);
 //}
 //
-///*********************************************************************
-// * Function: delayMs()
-// * Input: milliseconds
-// * Output: None
-// * Overview: Delays the specified number of milliseconds
-// * Note: Depends on Clock speed. Pic Dependent
-// * TestDate: 05-20-14
-// ********************************************************************/
-//void delayMs(int ms) {
-//    int myIndex;
-//    while (ms > 0) {
-//        myIndex = 0;
-//        while (myIndex < 667) {
-//            myIndex++;
-//        }
-//        ms--;
-//    }
-//}
+/*********************************************************************
+ * Function: delayMs()
+ * Input: milliseconds
+ * Output: None
+ * Overview: Delays the specified number of milliseconds
+ * Note: Depends on Clock speed. Pic Dependent
+ * TestDate: 05-20-14
+ ********************************************************************/
+void delayMs(int ms) {
+    int myIndex;
+    while (ms > 0) {
+        myIndex = 0;
+        while (myIndex < 667) {
+            myIndex++;
+        }
+        ms--;
+    }
+}
 //
 ////This function converts a BCD to DEC
 ////Input: BCD Value
@@ -325,34 +326,33 @@ void main(void) {
     int __attribute__ ((space(eedata))) eeData; // Global variable located in EEPROM
     
    
-    int handleMovement = 0; // Either 1 or no 0 if the handle moving upward
-	int timeOutStatus = 0; // Used to keep track of the water prime timeout
-    
-	float angleCurrent = 0; // Stores the current angle of the pump handle
-	float anglePrevious = 0; // Stores the last recorded angle of the pump handle
-	float angleDelta = 0; // Stores the difference between the current and previous angles
-	float upStrokePrime = 0; // Stores the sum of the upstrokes for calculating the prime
-	float upStrokeExtract = 0; // Stores the sum of the upstrokes for calculating volume
-	float volumeEvent = 0; // Stores the volume extracted
-	float leakRatePrevious = 0; // Stores the previous Leak Rate incase if someone stats to pump before leakage can be measured
-	float upStrokePrimeMeters = 0; // Stores the upstroke in meters
-	float leakRate = 0; // Rate at which water is leaking from the rising main
-    long leakRateTimeOut = 3000; // Equivalent to 3 seconds (in "upstrokeInterval" millisecond intervals); 
-
-    int currentDay;
-    char never_primed = 0;  //set to 1 if the priming loop is exited without detecting water
-    
-    float angle1 = 0;
-    float angle2 = 0;
-    float angle3 = 0;
-    float angle4 = 0;
-    float angle5 = 0;
-    float angle6 = 0;
-    float angle7 = 0;
-    float angle8 = 0;
-    float angle9 = 0;
-    float angle10 = 0; // *MAY NEED TO DELETE  
-    
+//    int handleMovement = 0; // Either 1 or no 0 if the handle moving upward
+//	int timeOutStatus = 0; // Used to keep track of the water prime timeout
+//    
+//	float angleCurrent = 0; // Stores the current angle of the pump handle
+//	float anglePrevious = 0; // Stores the last recorded angle of the pump handle
+//	float angleDelta = 0; // Stores the difference between the current and previous angles
+//	float upStrokePrime = 0; // Stores the sum of the upstrokes for calculating the prime
+//	float upStrokeExtract = 0; // Stores the sum of the upstrokes for calculating volume
+//	float volumeEvent = 0; // Stores the volume extracted
+//	float leakRatePrevious = 0; // Stores the previous Leak Rate incase if someone stats to pump before leakage can be measured
+//	float upStrokePrimeMeters = 0; // Stores the upstroke in meters
+//	float leakRate = 0; // Rate at which water is leaking from the rising main
+//    long leakRateTimeOut = 3000; // Equivalent to 3 seconds (in "upstrokeInterval" millisecond intervals); 
+//
+//    int currentDay;
+//    char never_primed = 0;  //set to 1 if the priming loop is exited without detecting water
+//    
+//    float angle1 = 0;
+//    float angle2 = 0;
+//    float angle3 = 0;
+//    float angle4 = 0;
+//    float angle5 = 0;
+//    float angle6 = 0;
+//    float angle7 = 0;
+//    float angle8 = 0;
+//    float angle9 = 0;
+//    float angle10 = 0; // *MAY NEED TO DELETE  
     // Initialize
     
     // Clear any data
