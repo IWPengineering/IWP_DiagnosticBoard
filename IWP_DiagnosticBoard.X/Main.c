@@ -351,10 +351,25 @@ void main(void) {
     float angle7 = 0;
     float angle8 = 0;
     float angle9 = 0;
-    float angle10 = 0; // *MAY NEED TO DELETE 
+    float angle10 = 0; // *MAY NEED TO DELETE  
     
     // Initialize
-    // 
+    
+    // Clear any data
+    
+    // Noon message section 
+    
+    // Diagnostic message section 
+    
+    // Are we pumping?
+    
+    // Do we have water? 
+    // if (readWaterSensor()) {
+    //      light up LED 
+    // }
+    
+    
+    
     
 //    ClearWatchDogTimer(); // Changed from ClearWatchDogTime() which one is correct? )
 //    
