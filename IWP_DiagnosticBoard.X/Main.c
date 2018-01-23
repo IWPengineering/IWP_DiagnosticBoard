@@ -321,41 +321,45 @@ int __attribute__ ((space(eedata))) eeData; // Global variable located in EEPROM
 //    return ((val / 16 * 10) + (val % 16));
 //}
 
-void main(void) {
-    int __attribute__ ((space(eedata))) eeData; // Global variable located in EEPROM
-    
-   
-    int handleMovement = 0; // Either 1 or no 0 if the handle moving upward
-	int timeOutStatus = 0; // Used to keep track of the water prime timeout
-    
-	float angleCurrent = 0; // Stores the current angle of the pump handle
-	float anglePrevious = 0; // Stores the last recorded angle of the pump handle
-	float angleDelta = 0; // Stores the difference between the current and previous angles
-	float upStrokePrime = 0; // Stores the sum of the upstrokes for calculating the prime
-	float upStrokeExtract = 0; // Stores the sum of the upstrokes for calculating volume
-	float volumeEvent = 0; // Stores the volume extracted
-	float leakRatePrevious = 0; // Stores the previous Leak Rate incase if someone stats to pump before leakage can be measured
-	float upStrokePrimeMeters = 0; // Stores the upstroke in meters
-	float leakRate = 0; // Rate at which water is leaking from the rising main
-    long leakRateTimeOut = 3000; // Equivalent to 3 seconds (in "upstrokeInterval" millisecond intervals); 
+    /* global variables. Might change*/
+int depthSensorPin = 2;
+int Pin4 = 4;
+int rxPin = 6;
+int xAxisAccelerometerPin = 24;
+int yAxisAccelerometerPin = 23;
+int batteryLevelPin = 11;
+int TimeSinceLastHourCheck = 0;  // we check this when we have gone around the no pumping loop enough times that 1 minute has gone by
+int hour = 0; // Hour of day
 
-    int currentDay;
-    char never_primed = 0;  //set to 1 if the priming loop is exited without detecting water
     
-    float angle1 = 0;
-    float angle2 = 0;
-    float angle3 = 0;
-    float angle4 = 0;
-    float angle5 = 0;
-    float angle6 = 0;
-    float angle7 = 0;
-    float angle8 = 0;
-    float angle9 = 0;
-    float angle10 = 0; // *MAY NEED TO DELETE  
-    
-    const float handleMovementThreshold = 5.0;
-    
-    int readAdc(int channel) //check with accelerometer
+float getHandleAngle() {
+
+    signed int xValue = readAdc(xAxis) - signedNumAdjustADC; 
+    signed int yValue = readAdc(yAxis) - signedNumAdjustADC; 
+    float angle = atan2(yValue, xValue) * (180 / PI); //returns angle in degrees 06-20-2014
+    // Calculate and return the angle of the pump handle
+    if (angle > 20) {
+        angle = 20.0;
+    } else if (angle < -30) {
+        angle = -30.0;
+    }
+    angle10 = angle9;
+    angle9 = angle8;
+    angle8 = angle7;
+    angle7 = angle6;
+    angle6 = angle5;
+    angle5 = angle4;
+    angle4 = angle3;
+    angle3 = angle2;
+    angle2 = angle1;
+    angle1 = angle;
+
+    float averageAngle = (angle1 + angle2 + angle3 + angle4 + angle5 + angle6 + angle7 + angle8 + angle9 + angle10) / 10.0;
+
+    return averageAngle;
+}
+
+int readAdc(int channel) //check with accelerometer
 {
     switch (channel) {
         case 0:
@@ -402,62 +406,74 @@ void main(void) {
             pinSampleSelectRegister(batteryLevelPin); // Connect batteryLevelPin
             break;
     }
-    AD1CON1bits.ADON = 1; // Turn on ADC
+    AD1CON1bits.ADON = 1; // Turn on ADC    //??? What is dis... Something from compiler?
     AD1CON1bits.SAMP = 1;
     while (!AD1CON1bits.DONE) {
     }
     unsigned int adcValue = ADC1BUF0;
     return adcValue;
-    
-    ***********************************
-    float getHandleAngle() {                //This is from Utilities
+}
 
-    signed int xValue = readAdc(xAxis) - signedNumAdjustADC; 
-    signed int yValue = readAdc(yAxis) - signedNumAdjustADC; 
-    float angle = atan2(yValue, xValue) * (180 / PI); //returns angle in degrees 06-20-2014
-    // Calculate and return the angle of the pump handle
-    if (angle > 20) {
-        angle = 20.0;
-    } else if (angle < -30) {
-        angle = -30.0;
+void ClearWatchDogTimer(void){
+     ClrWdt();
+}
+
+char BcdToDec(char val) {
+    return ((val / 16 * 10) + (val % 16));
+}
+
+void delayMs(int ms) {
+    int myIndex;
+    while (ms > 0) {
+        myIndex = 0;
+        while (myIndex < 667) {
+            myIndex++;
+        }
+        ms--;
     }
-    angle10 = angle9;
-    angle9 = angle8;
-    angle8 = angle7;
-    angle7 = angle6;
-    angle6 = angle5;
-    angle5 = angle4;
-    angle4 = angle3;
-    angle3 = angle2;
-    angle2 = angle1;
-    angle1 = angle;
+}
 
-    float averageAngle = (angle1 + angle2 + angle3 + angle4 + angle5 + angle6 + angle7 + angle8 + angle9 + angle10) / 10.0;
-
-    return averageAngle;
+void main(void) {
+    int __attribute__ ((space(eedata))) eeData; // Global variable located in EEPROM
     
-    ******************************************************************************************8
-    float newAngle = getHandleAngle();     //This is from main
-			float deltaAngle = newAngle - anglePrevious;
-			if(deltaAngle < 0) {
-				deltaAngle *= -1;
-			}
-            if(deltaAngle > handleMovementThreshold){            // The total movement of the handle from rest has been exceeded
-				//handleMovement = 1;      //Instead of handleMovement, we light up LED.
-            }
-    
-            
-               
-                
     // Initialize
     
     // Clear any data
-    
+    int handleMovement = 0; // Either 1 or no 0 if the handle moving upward
+    float angleCurrent = 0; // Stores the current angle of the pump handle
+	float anglePrevious = 0; // Stores the last recorded angle of the pump handle
+	float angleDelta = 0; // Stores the difference between the current and previous angles
     // Noon message section 
     
     // Diagnostic message section 
     
     // Are we pumping?
+    while (1)
+	{   
+        anglePrevious = getHandleAngle();                            // Get the angle of the pump handle to measure against.  
+                                                                     // This is our reference when looking for sufficient movement to say the handle is actually moving.  
+                                                                     // the "moving" threshold is defined by handleMovementThreshold in IWPUtilities
+     
+        handleMovement = 0;                                          // Set the handle movement to 0 (handle is not moving)
+		while (handleMovement == 0)
+		{ 
+            ClearWatchDogTimer();     // We stay in this loop if no one is pumping so we need to clear the WDT  
+            TimeSinceLastHourCheck++;
+            if(TimeSinceLastHourCheck > 5000){ // If no one is pumping this works out to be about every minute
+                hour = BcdToDec(getHourI2C());    //I2C stuff
+                TimeSinceLastHourCheck = 0;
+            }// Set the handle movement to 0 (handle is not moving)
+            
+            delayMs(upstrokeInterval);                            // Delay for a short time
+			float newAngle = getHandleAngle();
+			float deltaAngle = newAngle - anglePrevious;        //WHY IS THIS RED...
+			if(deltaAngle < 0) {
+				deltaAngle *= -1;
+			}
+            if(deltaAngle > handleMovementThreshold){            // The total movement of the handle from rest has been exceeded
+				//handleMovement = 1;     //TURN ON LED
+			}
+    }
     
     // Do we have water? 
     // if (readWaterSensor()) {
