@@ -94,6 +94,7 @@ int __attribute__ ((space(eedata))) eeData; // Global variable located in EEPROM
     float angle8 = 0;
     float angle9 = 0;
     float angle10 = 0;
+    const int pulseWidthThreshold = 20; 
 // *****************************************************
 //              Function Prototype
 // *****************************************************
@@ -294,32 +295,32 @@ int __attribute__ ((space(eedata))) eeData; // Global variable located in EEPROM
 //    return (pulseWidth <= pulseWidthThreshold);
 //}
 //
-///*********************************************************************
-// * Function: delayMs()
-// * Input: milliseconds
-// * Output: None
-// * Overview: Delays the specified number of milliseconds
-// * Note: Depends on Clock speed. Pic Dependent
-// * TestDate: 05-20-14
-// ********************************************************************/
-//void delayMs(int ms) {
-//    int myIndex;
-//    while (ms > 0) {
-//        myIndex = 0;
-//        while (myIndex < 667) {
-//            myIndex++;
-//        }
-//        ms--;
-//    }
-//}
-//
-////This function converts a BCD to DEC
-////Input: BCD Value
-////Returns: Hex Value
-//
-//char BcdToDec(char val) {
-//    return ((val / 16 * 10) + (val % 16));
-//}
+/*********************************************************************
+ * Function: delayMs()
+ * Input: milliseconds
+ * Output: None
+ * Overview: Delays the specified number of milliseconds
+ * Note: Depends on Clock speed. Pic Dependent
+ * TestDate: 05-20-14
+ ********************************************************************/
+void delayMs(int ms) {
+    int myIndex;
+    while (ms > 0) {
+        myIndex = 0;
+        while (myIndex < 667) {
+            myIndex++;
+        }
+        ms--;
+    }
+}
+
+//This function converts a BCD to DEC
+//Input: BCD Value
+//Returns: Hex Value
+
+char BcdToDec(char val) {
+    return ((val / 16 * 10) + (val % 16));
+}
 
     /* global variables. Might change*/
 int depthSensorPin = 2;
