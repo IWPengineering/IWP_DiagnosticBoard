@@ -179,28 +179,28 @@ void digitalPinSet(int pin, int set) // 1 for high, 0 for low
 //TODO: Should be based off of the RB values, not the AN
 void specifyAnalogPin(int pin, int analogOrDigital) // analogOrDigital = 1 if analog, 0 is digital
 {
-    if (pin == 5) {
+    if (pin == 5) { // WPS_OUT
         ANSAbits.ANSA3 = analogOrDigital; 
     }
-    else if (pin == 6) {
+    else if (pin == 6) { // ADXL_335_X
         ANSAbits.ANSA4 = analogOrDigital;
     }
-    else if (pin == 7) {
+    else if (pin == 7) { // ADXL_335_Y
         ANSAbits.ANSA5 = analogOrDigital;
     }
     else if (pin == 9) {
         ANSAbits.ANSA7 = analogOrDigital;
     }
-    else if (pin == 10) {
+    else if (pin == 10) { // Push button
         ANSAbits.ANSA6 = analogOrDigital;
     }
 //    else if (pin == 11) { // CHECK THIS ON DATASHEET 
 //        ANSCbits.ANSC0 = analogOrDigital;
 //    }
-    else if (pin == 12) {
+    else if (pin == 12) { // PIC_PIN4
         ANSCbits.ANSC1 = analogOrDigital;
     }
-    else if (pin == 13) {
+    else if (pin == 13) { // PIC_PIN5
         ANSCbits.ANSC2 = analogOrDigital;
     }
 //    else if (pin == 14) { // CHECK THIS ON DATASHEET
@@ -212,16 +212,16 @@ void specifyAnalogPin(int pin, int analogOrDigital) // analogOrDigital = 1 if an
 //    else if (pin == 16) { // CHECK THIS ON DATASHEET
 //        ANSCbits.ANSC5 = analogOrDigital;
 //    }
-    else if (pin == 17) {
+    else if (pin == 17) { // TX
         ANSCbits.ANSC6 = analogOrDigital;
     }
-    else if (pin == 18) {
+    else if (pin == 18) { // RX
         ANSCbits.ANSC7 = analogOrDigital;
     }
-    else if (pin == 21) {
+    else if (pin == 21) { // PICKIT_5
         ANSBbits.ANSB0 = analogOrDigital;
     }
-    else if (pin == 22) {
+    else if (pin == 22) { // PICKIT_4
         ANSBbits.ANSB1 = analogOrDigital;
     }
     else if (pin == 23) {
@@ -246,44 +246,18 @@ void specifyAnalogPin(int pin, int analogOrDigital) // analogOrDigital = 1 if an
 }
 
 
-void pinSampleSelectRegister(int pin) { //  A/D Sample Select Regiser 
+void pinSampleSelectRegister(int pin) { //  A/D Sample Select Register (CHECK WHEN USED)  
                         //(this is only used in the readADC() function)
-//    if (pin == 4)
-//	{
-//		AD1CHSbits.CH0SA = 2; //AN2
-//	}
-//	else if (pin == 5)
-//	{
-//		AD1CHSbits.CH0SA = 3; //AN3
-//	}
-//	else if (pin == 6)
-//	{
-//		AD1CHSbits.CH0SA = 4;
-//	}
-//	else if (pin == 7)
-//	{
-//		AD1CHSbits.CH0SA = 5;
-//	}
-//	else if (pin == 11)
-//	{
-//		AD1CHSbits.CH0SA = 15;
-//	}
-//	else if (pin == 23)
-//	{
-//		AD1CHSbits.CH0SA = 12;
-//	}
-//	else if (pin == 24)
-//	{
-//		AD1CHSbits.CH0SA = 11;
-//	}
-//	else if (pin == 25)
-//	{
-//		AD1CHSbits.CH0SA = 10;
-//	}
-//	else if (pin == 26)
-//	{
-//		AD1CHSbits.CH0SA = 9;
-//	}
+    if (pin == 6) { // ADXL_335_X NEED TO CHECK
+        AD1CHSbits.CH0SA = 4; // ANA4
+    }
+    else if (pin == 7) {
+        AD1CHSbits.CH0SA = 5; // ANA5
+    }
+    else if (pin == 17) {
+        AD1CHSbits.CH0SA = 6; // ANC6 NEED TO CHECK 
+    }
+   
 }
 
 int digitalPinStatus(int pin)
@@ -391,14 +365,3 @@ int digitalPinStatus(int pin)
 }
 
 
-//DEBUG DEBUG DEBUG DEBUG
-//void debugHighLow(int pin){
-//    specifyAnalogPin(pin, 0); // makes digital
-//    pinDirectionIO(pin, 0); // makes output
-//    if(digitalPinStatus(pin) == 0) {
-//        digitalPinSet(pin, 1); // makes high
-//    }
-//    else{
-//        digitalPinSet(pin, 0); //makes low
-//    }
-//}
