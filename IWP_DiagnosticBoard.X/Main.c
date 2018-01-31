@@ -5,70 +5,61 @@
  * Created on November 27, 2017, 3:52 PM
  */
 
-// CONFIG1L
-#pragma config FEXTOSC = LP     // External Oscillator mode Selection bits (LP (crystal oscillator) optimized for 32.768 kHz; PFM set to low power)
-#pragma config RSTOSC = LFINTOSC// Power-up default value for COSC bits (Low-Frequency Oscillator)
+// PIC24FV32KA302 Configuration Bit Settings
 
-// CONFIG1H
-#pragma config CLKOUTEN = OFF   // Clock Out Enable bit (CLKOUT function is disabled)
-#pragma config CSWEN = ON       // Clock Switch Enable bit (Writing to NOSC and NDIV is allowed)
-#pragma config FCMEN = ON       // Fail-Safe Clock Monitor Enable bit (Fail-Safe Clock Monitor enabled)
+// 'C' source line config statements
 
-// CONFIG2L
-#pragma config MCLRE = EXTMCLR  // Master Clear Enable bit (If LVP = 0, MCLR pin is MCLR; If LVP = 1, RE3 pin function is MCLR )
-#pragma config PWRTE = OFF      // Power-up Timer Enable bit (Power up timer disabled)
-#pragma config LPBOREN = OFF    // Low-power BOR enable bit (ULPBOR disabled)
-#pragma config BOREN = SBORDIS  // Brown-out Reset Enable bits (Brown-out Reset enabled , SBOREN bit is ignored)
+// FBS
+#pragma config BWRP = OFF               // Boot Segment Write Protect (Disabled)
+#pragma config BSS = OFF                // Boot segment Protect (No boot program flash segment)
 
-// CONFIG2H
-#pragma config BORV = VBOR_2P45 // Brown Out Reset Voltage selection bits (Brown-out Reset Voltage (VBOR) set to 2.45V)
-#pragma config ZCD = OFF        // ZCD Disable bit (ZCD disabled. ZCD can be enabled by setting the ZCDSEN bit of ZCDCON)
-#pragma config PPS1WAY = ON     // PPSLOCK bit One-Way Set Enable bit (PPSLOCK bit can be cleared and set only once; PPS registers remain locked after one clear/set cycle)
-#pragma config STVREN = ON      // Stack Full/Underflow Reset Enable bit (Stack full/underflow will cause Reset)
-#pragma config DEBUG = OFF      // Debugger Enable bit (Background debugger disabled)
-#pragma config XINST = OFF      // Extended Instruction Set Enable bit (Extended Instruction Set and Indexed Addressing Mode disabled)
+// FGS
+#pragma config GWRP = OFF               // General Segment Write Protect (General segment may be written)
+#pragma config GSS0 = OFF               // General Segment Code Protect (No Protection)
 
-// CONFIG3L
-#pragma config WDTCPS = WDTCPS_31// WDT Period Select bits (Divider ratio 1:65536; software control of WDTPS)
-#pragma config WDTE = ON        // WDT operating mode (WDT enabled regardless of sleep)
+// FOSCSEL
+#pragma config FNOSC = FRCDIV           // Oscillator Select (8MHz FRC oscillator With Postscaler (FRCDIV))
+#pragma config SOSCSRC = ANA            // SOSC Source Type (Analog Mode for use with crystal)
+#pragma config LPRCSEL = HP             // LPRC Oscillator Power and Accuracy (High Power, High Accuracy Mode)
+#pragma config IESO = ON                // Internal External Switch Over bit (Internal External Switchover mode enabled (Two-speed Start-up enabled))
 
-// CONFIG3H
-#pragma config WDTCWS = WDTCWS_7// WDT Window Select bits (window always open (100%); software control; keyed access not required)
-#pragma config WDTCCS = SC      // WDT input clock selector (Software Control)
+// FOSC
+#pragma config POSCMOD = NONE           // Primary Oscillator Configuration bits (Primary oscillator disabled)
+#pragma config OSCIOFNC = ON            // CLKO Enable Configuration bit (CLKO output signal is active on the OSCO pin)
+#pragma config POSCFREQ = HS            // Primary Oscillator Frequency Range Configuration bits (Primary oscillator/external clock input frequency greater than 8MHz)
+#pragma config SOSCSEL = SOSCHP         // SOSC Power Selection Configuration bits (Secondary Oscillator configured for high-power operation)
+#pragma config FCKSM = CSDCMD           // Clock Switching and Monitor Selection (Both Clock Switching and Fail-safe Clock Monitor are disabled)
 
-// CONFIG4L
-#pragma config WRT0 = OFF       // Write Protection Block 0 (Block 0 (000800-003FFFh) not write-protected)
-#pragma config WRT1 = OFF       // Write Protection Block 1 (Block 1 (004000-007FFFh) not write-protected)
-#pragma config WRT2 = OFF       // Write Protection Block 2 (Block 2 (008000-00BFFFh) not write-protected)
-#pragma config WRT3 = OFF       // Write Protection Block 3 (Block 3 (00C000-00FFFFh) not write-protected)
+// FWDT
+#pragma config WDTPS = PS32768          // Watchdog Timer Postscale Select bits (1:32768)
+#pragma config FWPSA = PR128            // WDT Prescaler bit (WDT prescaler ratio of 1:128)
+#pragma config FWDTEN = OFF             // Watchdog Timer Enable bits (WDT disabled in hardware; SWDTEN bit disabled)
+#pragma config WINDIS = OFF             // Windowed Watchdog Timer Disable bit (Standard WDT selected(windowed WDT disabled))
 
-// CONFIG4H
-#pragma config WRTC = OFF       // Configuration Register Write Protection bit (Configuration registers (300000-30000Bh) not write-protected)
-#pragma config WRTB = OFF       // Boot Block Write Protection bit (Boot Block (000000-0007FFh) not write-protected)
-#pragma config WRTD = OFF       // Data EEPROM Write Protection bit (Data EEPROM not write-protected)
-#pragma config SCANE = ON       // Scanner Enable bit (Scanner module is available for use, SCANMD bit can control the module)
-#pragma config LVP = ON         // Low Voltage Programming Enable bit (Low voltage programming enabled. MCLR/VPP pin function is MCLR. MCLRE configuration bit is ignored)
+// FPOR
+#pragma config BOREN = BOR3             // Brown-out Reset Enable bits (Brown-out Reset enabled in hardware, SBOREN bit disabled)
+#pragma config LVRCFG = OFF             // Low Voltage Regulator Configuration bit (Low Voltage regulator is not available)
+#pragma config PWRTEN = ON              // Power-up Timer Enable bit (PWRT enabled)
+#pragma config I2C1SEL = PRI            // Alternate I2C1 Pin Mapping bit (Use Default SCL1/SDA1 Pins For I2C1)
+#pragma config BORV = V20               // Brown-out Reset Voltage bits (Brown-out Reset set to lowest voltage (2.0V))
+#pragma config MCLRE = ON               // MCLR Pin Enable bit (RA5 input pin disabled,MCLR pin enabled)
 
-// CONFIG5L
-#pragma config CP = OFF         // UserNVM Program Memory Code Protection bit (UserNVM code protection disabled)
-#pragma config CPD = OFF        // DataNVM Memory Code Protection bit (DataNVM code protection disabled)
+// FICD
+#pragma config ICS = PGx1               // ICD Pin Placement Select bits (EMUC/EMUD share PGC1/PGD1)
 
-// CONFIG5H
+// FDS
+#pragma config DSWDTPS = DSWDTPSF       // Deep Sleep Watchdog Timer Postscale Select bits (1:2,147,483,648 (25.7 Days))
+#pragma config DSWDTOSC = LPRC          // DSWDT Reference Clock Select bit (DSWDT uses Low Power RC Oscillator (LPRC))
+#pragma config DSBOREN = ON             // Deep Sleep Zero-Power BOR Enable bit (Deep Sleep BOR enabled in Deep Sleep)
+#pragma config DSWDTEN = ON             // Deep Sleep Watchdog Timer Enable bit (DSWDT enabled)
 
-// CONFIG6L
-#pragma config EBTR0 = OFF      // Table Read Protection Block 0 (Block 0 (000800-003FFFh) not protected from table reads executed in other blocks)
-#pragma config EBTR1 = OFF      // Table Read Protection Block 1 (Block 1 (004000-007FFFh) not protected from table reads executed in other blocks)
-#pragma config EBTR2 = OFF      // Table Read Protection Block 2 (Block 2 (008000-00BFFFh) not protected from table reads executed in other blocks)
-#pragma config EBTR3 = OFF      // Table Read Protection Block 3 (Block 3 (00C000-00FFFFh) not protected from table reads executed in other blocks)
+// #pragma config statements should precede project file includes.
+// Use project enums instead of #define for ON and OFF.
 
-// CONFIG6H
-#pragma config EBTRB = OFF      // Boot Block Table Read Protection bit (Boot Block (000000-0007FFh) not protected from table reads executed in other blocks)
-
-
+#include <xc.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
-#include <xc.h>
 #include <string.h>
 #include <p18F26K40.h>
 #include <Pin_Manager.h>
@@ -110,6 +101,103 @@ int __attribute__ ((space(eedata))) eeData; // Global variable located in EEPROM
 //char BcdToDec(char val);
 //
 //
+/*********************************************************************
+ * Function: initialization()
+ * Input: None
+ * Output: None
+ * Overview: configures chip to work in our system (when power is turned on, these are set once)
+ * Note: Pic Dependent
+ * TestDate: 06-03-14
+ ********************************************************************/
+void initialization(void) {
+    ////------------Sets up all ports as digital inputs-----------------------
+    //IO port control
+    ANSA = 0; // Make PORTA digital I/O
+    TRISA = 0xFFFF; // Make PORTA all inputs
+    ANSB = 0; // All port B pins are digital. Individual ADC are set in the readADC function
+    TRISB = 0xFFFF; // Sets all of port B to input
+    ANSC = 0;
+    TRISC = 0xFFFF; 
+
+    // Timer control (for WPS)
+    T1CONbits.TCS = 0; // Source is Internal Clock if FNOSC = FRC, Fosc/2 = 4Mhz
+    T1CONbits.TCKPS = 0b11; // Prescalar to 1:256 
+                            // if FNOSC = FRC, Timer Clock = 15.625khz
+    T1CONbits.TON = 1; // Enable the timer (timer 1 is used for the water sensor and checking for network)
+
+    // Timer control (for getHandleAngle())
+    T2CONbits.TCS = 0; //Source is Internal Clock Fosc/2  if #pragma config FNOSC = FRC, Fosc/2 = 4Mhz
+    T2CONbits.T32 = 0; // Using 16-bit timer2
+    T2CONbits.TCKPS = 0b11; // Prescalar to 1:256 (Need prescalar of at least 1:8 for this) 
+                            // if FNOSC = FRC, Timer Clock = 15.625khz
+    T2CONbits.TON = 1; // Starts 16-bit Timer2
+
+    // UART config
+//    U1MODE = 0x8000;  
+    U1MODEbits.BRGH = 0;  // Use the standard BRG speed
+    U1BRG = 25;           // set baud to 9600, assumes FCY=4Mhz (FNOSC = FRC)
+    U1MODEbits.PDSEL = 0; // 8 bit data, no parity
+    U1MODEbits.STSEL = 0; // 1 stop bit
+    
+                           // The Tx and Rx PINS are enabled as the default 
+    U1STA = 0;            // clear Status and Control Register 
+    U1STAbits.UTXEN = 0;  // disable transmit
+                          // no need to enable receive.  The default is that a 
+                          // receive interrupt will be generated when any character
+                          // is received and transferred to the receive buffer
+    U1STAbits.URXISEL =0; // generate an interrupt each time a character is received
+    IFS0bits.U1RXIF = 0;  // clear the Rx interrupt flag
+    _U1RXIF = 0;  
+   // IEC0bits.U1RXIE = 1;  // enable Rx interrupts
+   // _U1RXIE = 1;
+    U1MODEbits.UARTEN = 1; // Turn on the UART
+    ReceiveTextMsg[0] = 0;  // Start with an empty string
+    ReceiveTextMsgFlag = 0;
+           
+
+     
+    pinDirectionIO(18, 1); // Explicitly say RX Control Board is an input 
+    pinDirectionIO(17, 1); // Explicitly say TX Control Board is an input 
+    //H2O sensor configurations
+//    pinDirectionIO(waterPresenceSensorOnOffPin, 0); //makes water presence sensor pin an output.
+//    digitalPinSet(waterPresenceSensorOnOffPin, 0); //turns off the water presence sensor.
+
+    initAdc();    
+    
+    angle2 = getHandleAngle(); // Deduce handle movement 
+    angle3 = getHandleAngle();
+    angle4 = getHandleAngle();
+    angle5 = getHandleAngle();
+    angle6 = getHandleAngle();
+    angle7 = getHandleAngle();
+    angle8 = getHandleAngle();
+    angle9 = getHandleAngle();
+    angle10 = getHandleAngle();
+    
+}
+/*********************************************************************
+ * Function: delayMs()
+ * Input: milliseconds
+ * Output: None
+ * Overview: Delays the specified number of milliseconds. Handles
+ *           any amount of time, more accurate calculation. 
+ * Note: Assumes that TMR1 is clocked by 15.625khz
+ *       1ms is actually 1.12, 2ms = 2.12, 3ms = 3.08, 5ms = 5.12
+ * TestDate: 12-20-2017 RKF
+ ********************************************************************/
+void delayMs(int ms) { // Actually using the timer
+    int end_count;
+    while(ms > 4000){ // Up to 4 seconds
+        TMR1 = 0;
+        while(TMR1 < 62500){} //wait 4000ms
+        ms = ms - 4000;
+    }
+    // now we fit within the timer's range
+    end_count = ms*15.625; // assumes TC1 is clocked by 15.625khz
+    TMR1 = 0;
+    while(TMR1<end_count){}
+}
+    
 ///*********************************************************************
 // * Function: ClearWatchDogTimer()
 // * Input: none
@@ -264,38 +352,38 @@ int __attribute__ ((space(eedata))) eeData; // Global variable located in EEPROM
 // * Function: readWaterSensor
 // * Input: None
 // * Output: pulseWidth
-// * Overview: RB5 is one water sensor, start at beginning of positive pulse
+// * Overview: RA3 is one water sensor, start at beginning of positive pulse
 // * Note: Pic Dependent
-// * TestDate: Not tested as of 03-05-2015
+// * TestDate: Not tested as of 01-31-2018 ALERT: TO BE FIXED 
 // ********************************************************************/ 
-//int readWaterSensor(void) { // RB5 is one water sensor
-//    // turn on and off in the Main loop so the 555 has time to stabelize 
-//   // digitalPinSet(waterPresenceSensorOnOffPin, 1); //turns on the water presence sensor.
-//   
-//    delayMs(5);  //debug
-//    if (digitalPinStatus(waterPresenceSensorPin) == 1) {
-//        while (digitalPinStatus(waterPresenceSensorPin)) {
-//        }; //make sure you start at the beginning of the positive pulse
-//    }
-//    while (digitalPinStatus(waterPresenceSensorPin) == 0) {
-//    }; //wait for rising edge
-//    int prevICTime = TMR1; //get time at start of positive pulse
-//    while (digitalPinStatus(waterPresenceSensorPin)) {
-//    };
-//    int currentICTime = TMR1; //get time at end of positive pulse
-//    long pulseWidth = 0;
-//    if (currentICTime >= prevICTime) {
-//        pulseWidth = (currentICTime - prevICTime);
-//    } else {
-//        pulseWidth = (currentICTime - prevICTime + 0x100000000);
-//    }
-//    
-//    // digitalPinSet(waterPresenceSensorOnOffPin, 0); //turns off the water presence sensor.
-//
-//    //Check if this value is right
-//    return (pulseWidth <= pulseWidthThreshold);
-//}
-//
+int readWaterSensor(void) { // RA3 is one water sensor
+    // turn on and off in the Main loop so the 555 has time to stabilize 
+   // digitalPinSet(waterPresenceSensorOnOffPin, 1); //turns on the water presence sensor.
+   
+    delayMs(5);  //debug
+    if (digitalPinStatus(waterPresenceSensorPin) == 1) {   // Could get hung if it stays high, what is maximum 
+        while (digitalPinStatus(waterPresenceSensorPin)) { // amount of time in this state? 
+        }; //make sure you start at the beginning of the positive pulse
+    }
+    while (digitalPinStatus(waterPresenceSensorPin) == 0) {
+    }; //wait for rising edge
+    int prevICTime = TMR1; //get time at start of positive pulse
+    while (digitalPinStatus(waterPresenceSensorPin)) {
+    };
+    int currentICTime = TMR1; //get time at end of positive pulse
+    long pulseWidth = 0;
+    if (currentICTime >= prevICTime) {
+        pulseWidth = (currentICTime - prevICTime);
+    } else {
+        pulseWidth = (currentICTime - prevICTime + 0x100000000);
+    }
+    
+    // digitalPinSet(waterPresenceSensorOnOffPin, 0); //turns off the water presence sensor.
+
+    //Check if this value is right
+    return (pulseWidth <= pulseWidthThreshold);
+}
+
 /*********************************************************************
  * Function: delayMs()
  * Input: milliseconds
