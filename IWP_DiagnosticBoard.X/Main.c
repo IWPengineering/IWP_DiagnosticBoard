@@ -87,6 +87,12 @@ int __attribute__ ((space(eedata))) eeData; // Global variable located in EEPROM
     float angle9 = 0;
     float angle10 = 0;
     const int pulseWidthThreshold = 20; 
+    
+// ****************************************************************************
+// *** Global Variables *******************************************************
+// ****************************************************************************
+    int waterPresenceSensorPin = 5;
+    
 // *****************************************************
 //              Function Prototype
 // *****************************************************
@@ -348,41 +354,82 @@ void delayMs(int ms) { // Actually using the timer
 //    // second half read is complete
 //}
 //
+
+/*********************************************************************
+ * Function: readWaterSensor
+ * Input: None
+ * Output: 1 if water is present and 0 if it is not
+ * Overview: The output of the 555 times is monitored to see what its
+ *           output frequency is.  When there is no water, the frequency
+ *           is less than 400hz.  If the frequency is greater than this
+ *           we assume water is present.  We only measure the duration of
+ *           the high part of the pulse. * 
+ *           This routine assumes that Timer1 is clocked at 15.625khz
+ * Note: Pic Dependent
+ * TestDate: changed and not tested as of 1-31-2018
+ ********************************************************************/
+int readWaterSensor(void) // RA3 is one water sensor
+{
+    int WaterPresent = 0;  //assume there is no water
+   // turn WPS on and off in the Main loop 
+    delayMs(5);  //make sure the 555 has had time to turn on 
+    
+    
+    //make sure you start at the beginning of the positive pulse
+    TMR1 = 0;
+    if (digitalPinStatus(waterPresenceSensorPin) == 1) {
+        while ((digitalPinStatus(waterPresenceSensorPin))&&(TMR1 <= pulseWidthThreshold)) { //quit if the line is high for too long
+        }; 
+    }
+    //wait for rising edge
+    TMR1 = 0;
+    while ((digitalPinStatus(waterPresenceSensorPin) == 0)&&(TMR1 <= pulseWidthThreshold)) { //quit if the line is low for too long
+    }; 
+    //Now measure the high part of the signal
+    TMR1 = 0;
+    while ((digitalPinStatus(waterPresenceSensorPin))&&(TMR1 <= pulseWidthThreshold)) { //quit if the line is high for too long
+    };
+    if(TMR1 <= pulseWidthThreshold){
+        WaterPresent = 1;
+    }
+    return WaterPresent;
+}
+
 ///*********************************************************************
-// * Function: readWaterSensor
+// * Function: readWaterSensor  BAD VERSION
 // * Input: None
 // * Output: pulseWidth
 // * Overview: RA3 is one water sensor, start at beginning of positive pulse
 // * Note: Pic Dependent
 // * TestDate: Not tested as of 01-31-2018 ALERT: TO BE FIXED 
 // ********************************************************************/ 
-int readWaterSensor(void) { // RA3 is one water sensor
-    // turn on and off in the Main loop so the 555 has time to stabilize 
-   // digitalPinSet(waterPresenceSensorOnOffPin, 1); //turns on the water presence sensor.
-   
-    delayMs(5);  //debug
-    if (digitalPinStatus(waterPresenceSensorPin) == 1) {   // Could get hung if it stays high, what is maximum 
-        while (digitalPinStatus(waterPresenceSensorPin)) { // amount of time in this state? 
-        }; //make sure you start at the beginning of the positive pulse
-    }
-    while (digitalPinStatus(waterPresenceSensorPin) == 0) {
-    }; //wait for rising edge
-    int prevICTime = TMR1; //get time at start of positive pulse
-    while (digitalPinStatus(waterPresenceSensorPin)) {
-    };
-    int currentICTime = TMR1; //get time at end of positive pulse
-    long pulseWidth = 0;
-    if (currentICTime >= prevICTime) {
-        pulseWidth = (currentICTime - prevICTime);
-    } else {
-        pulseWidth = (currentICTime - prevICTime + 0x100000000);
-    }
-    
-    // digitalPinSet(waterPresenceSensorOnOffPin, 0); //turns off the water presence sensor.
-
-    //Check if this value is right
-    return (pulseWidth <= pulseWidthThreshold);
-}
+//int readWaterSensor(void) { // RA3 is one water sensor
+//    // turn on and off in the Main loop so the 555 has time to stabilize 
+//   // digitalPinSet(waterPresenceSensorOnOffPin, 1); //turns on the water presence sensor.
+//   
+//    delayMs(5);  //debug
+//    if (digitalPinStatus(waterPresenceSensorPin) == 1) {   // Could get hung if it stays high, what is maximum 
+//        while (digitalPinStatus(waterPresenceSensorPin)) { // amount of time in this state? 
+//        }; //make sure you start at the beginning of the positive pulse
+//    }
+//    while (digitalPinStatus(waterPresenceSensorPin) == 0) {
+//    }; //wait for rising edge
+//    int prevICTime = TMR1; //get time at start of positive pulse
+//    while (digitalPinStatus(waterPresenceSensorPin)) {
+//    };
+//    int currentICTime = TMR1; //get time at end of positive pulse
+//    long pulseWidth = 0;
+//    if (currentICTime >= prevICTime) {
+//        pulseWidth = (currentICTime - prevICTime);
+//    } else {
+//        pulseWidth = (currentICTime - prevICTime + 0x100000000);
+//    }
+//    
+//    // digitalPinSet(waterPresenceSensorOnOffPin, 0); //turns off the water presence sensor.
+//
+//    //Check if this value is right
+//    return (pulseWidth <= pulseWidthThreshold);
+//}
 
 /*********************************************************************
  * Function: delayMs()
