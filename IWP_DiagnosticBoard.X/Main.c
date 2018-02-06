@@ -62,7 +62,7 @@
 #include <math.h>
 #include <string.h>
 #include <p18F26K40.h>
-#include <Pin_Manager.h> // CHECK HAD ERROR
+#include <Pin_Manager.h>
 
 int __attribute__ ((space(eedata))) eeData; // Global variable located in EEPROM
 
@@ -115,9 +115,7 @@ int __attribute__ ((space(eedata))) eeData; // Global variable located in EEPROM
  * Note: Pic Dependent
  * TestDate: 06-03-14
  ********************************************************************/
-    /*********************
 void initialization(void) {
-    
     ////------------Sets up all ports as digital inputs-----------------------
     //IO port control
     ANSA = 0; // Make PORTA digital I/O
@@ -172,7 +170,6 @@ void initialization(void) {
 
     initAdc();    
     
-            
     angle2 = getHandleAngle(); // Deduce handle movement 
     angle3 = getHandleAngle();
     angle4 = getHandleAngle();
@@ -184,9 +181,6 @@ void initialization(void) {
     angle10 = getHandleAngle();
     
 }
-
-********/
-    
 /*********************************************************************
  * Function: delayMs()
  * Input: milliseconds
@@ -401,6 +395,61 @@ int readWaterSensor(void) // RA3 is one water sensor
     return WaterPresent;
 }
 
+///*********************************************************************
+// * Function: readWaterSensor  BAD VERSION
+// * Input: None
+// * Output: pulseWidth
+// * Overview: RA3 is one water sensor, start at beginning of positive pulse
+// * Note: Pic Dependent
+// * TestDate: Not tested as of 01-31-2018 ALERT: TO BE FIXED 
+// ********************************************************************/ 
+//int readWaterSensor(void) { // RA3 is one water sensor
+//    // turn on and off in the Main loop so the 555 has time to stabilize 
+//   // digitalPinSet(waterPresenceSensorOnOffPin, 1); //turns on the water presence sensor.
+//   
+//    delayMs(5);  //debug
+//    if (digitalPinStatus(waterPresenceSensorPin) == 1) {   // Could get hung if it stays high, what is maximum 
+//        while (digitalPinStatus(waterPresenceSensorPin)) { // amount of time in this state? 
+//        }; //make sure you start at the beginning of the positive pulse
+//    }
+//    while (digitalPinStatus(waterPresenceSensorPin) == 0) {
+//    }; //wait for rising edge
+//    int prevICTime = TMR1; //get time at start of positive pulse
+//    while (digitalPinStatus(waterPresenceSensorPin)) {
+//    };
+//    int currentICTime = TMR1; //get time at end of positive pulse
+//    long pulseWidth = 0;
+//    if (currentICTime >= prevICTime) {
+//        pulseWidth = (currentICTime - prevICTime);
+//    } else {
+//        pulseWidth = (currentICTime - prevICTime + 0x100000000);
+//    }
+//    
+//    // digitalPinSet(waterPresenceSensorOnOffPin, 0); //turns off the water presence sensor.
+//
+//    //Check if this value is right
+//    return (pulseWidth <= pulseWidthThreshold);
+//}
+
+/*********************************************************************
+ * Function: delayMs()
+ * Input: milliseconds
+ * Output: None
+ * Overview: Delays the specified number of milliseconds
+ * Note: Depends on Clock speed. Pic Dependent
+ * TestDate: 05-20-14
+ ********************************************************************/
+void delayMs(int ms) {
+    int myIndex;
+    while (ms > 0) {
+        myIndex = 0;
+        while (myIndex < 667) {
+            myIndex++;
+        }
+        ms--;
+    }
+}
+
 //This function converts a BCD to DEC
 //Input: BCD Value
 //Returns: Hex Value
@@ -419,7 +468,7 @@ int batteryLevelPin = 11;
 int TimeSinceLastHourCheck = 0;  // we check this when we have gone around the no pumping loop enough times that 1 minute has gone by
 int hour = 0; // Hour of day
 
-/*******
+    
 float getHandleAngle() {
 
     signed int xValue = readAdc(xAxis) - signedNumAdjustADC; 
@@ -446,9 +495,7 @@ float getHandleAngle() {
 
     return averageAngle;
 }
-  **********/
 
-/*******
 int readAdc(int channel) //check with accelerometer
 {
     switch (channel) {
@@ -496,15 +543,13 @@ int readAdc(int channel) //check with accelerometer
             pinSampleSelectRegister(batteryLevelPin); // Connect batteryLevelPin
             break;
     }
-    AD1CON1bits.ADON = 1; // Turn on ADC   
+    AD1CON1bits.ADON = 1; // Turn on ADC    //??? What is dis... Something from compiler?
     AD1CON1bits.SAMP = 1;
     while (!AD1CON1bits.DONE) {
     }
     unsigned int adcValue = ADC1BUF0;
     return adcValue;
 }
-
-**/
 
 void ClearWatchDogTimer(void){
      ClrWdt();
@@ -514,7 +559,6 @@ char BcdToDec(char val) {
     return ((val / 16 * 10) + (val % 16));
 }
 
-/**
 void delayMs(int ms) {
     int myIndex;
     while (ms > 0) {
@@ -525,20 +569,8 @@ void delayMs(int ms) {
         ms--;
     }
 }
-  **/
 
 void main(void) {
-    
-    TRISBbits.TRISB6 = 0;
-    
-    while(1) {
-        PORTBbits.RB6 = 1;
-        delayMs(1000);
-        PORTBbits.RB6 = 0;
-        delayMs(2000);
-    }
-    
-    /******
     int __attribute__ ((space(eedata))) eeData; // Global variable located in EEPROM
     
     // Initialize
@@ -579,10 +611,7 @@ void main(void) {
 				//handleMovement = 1;     //TURN ON LED
 			}
     }
-    *******************/
-        
-        
-        
+    
     // Do we have water? 
     // if (readWaterSensor()) {
     //      light up LED 
@@ -785,4 +814,3 @@ void main(void) {
 //    }             
     return;
 }
-
