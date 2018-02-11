@@ -62,7 +62,7 @@
 #include <math.h>
 #include <string.h>
 #include <p18F26K40.h>
-#include <Pin_Manager.h> // CHECK HAD ERROR
+#include <Pin_Manager.h> 
 
 int __attribute__ ((space(eedata))) eeData; // Global variable located in EEPROM
 
