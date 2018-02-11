@@ -16,8 +16,8 @@
 ////                                                             ////
 /////////////////////////////////////////////////////////////////////
 void pinDirectionIO(int pin, int io) { // 1 is an input, 0 is an output
-	// Pin 1 can't change direction
-    if (pin == 2) {
+	// Pin 1 can't change direction 
+    if (pin == 2) { // CHECK IF LATX OR TRISX
         TRISAbits.TRISA0 = io;
     }
     else if (pin == 3) {
@@ -180,67 +180,67 @@ void digitalPinSet(int pin, int set) // 1 for high, 0 for low
 void specifyAnalogPin(int pin, int analogOrDigital) // analogOrDigital = 1 if analog, 0 is digital
 {
     if (pin == 5) { // WPS_OUT
-        ANSAbits.ANSA3 = analogOrDigital; 
+        ANSELAbits.ANSA3 = analogOrDigital; 
     }
     else if (pin == 6) { // ADXL_335_X
-        ANSAbits.ANSA4 = analogOrDigital;
+        ANSELAbits.ANSA4 = analogOrDigital;
     }
     else if (pin == 7) { // ADXL_335_Y
-        ANSAbits.ANSA5 = analogOrDigital;
+        ANSELAbits.ANSA5 = analogOrDigital;
     }
     else if (pin == 9) {
-        ANSAbits.ANSA7 = analogOrDigital;
+        ANSELAbits.ANSA7 = analogOrDigital;
     }
     else if (pin == 10) { // Push button
-        ANSAbits.ANSA6 = analogOrDigital;
+        ANSELAbits.ANSA6 = analogOrDigital;
     }
 //    else if (pin == 11) { // CHECK THIS ON DATASHEET 
-//        ANSCbits.ANSC0 = analogOrDigital;
+//        ANSELCbits.ANSC0 = analogOrDigital;
 //    }
     else if (pin == 12) { // PIC_PIN4
-        ANSCbits.ANSC1 = analogOrDigital;
+        ANSELCbits.ANSC1 = analogOrDigital;
     }
     else if (pin == 13) { // PIC_PIN5
-        ANSCbits.ANSC2 = analogOrDigital;
+        ANSELCbits.ANSC2 = analogOrDigital;
     }
 //    else if (pin == 14) { // CHECK THIS ON DATASHEET
-//        ANSCbits.ANSC3 = analogOrDigital;
+//        ANSELCbits.ANSC3 = analogOrDigital;
 //    }
 //    else if (pin == 15) { // CHECK THIS ON DATASHEET
-//        ANSCbits.ANSC4 = analogOrDigital;
+//        ANSELCbits.ANSC4 = analogOrDigital;
 //    }
 //    else if (pin == 16) { // CHECK THIS ON DATASHEET
-//        ANSCbits.ANSC5 = analogOrDigital;
+//        ANSELCbits.ANSC5 = analogOrDigital;
 //    }
     else if (pin == 17) { // TX
-        ANSCbits.ANSC6 = analogOrDigital;
+        ANSELCbits.ANSC6 = analogOrDigital;
     }
     else if (pin == 18) { // RX
-        ANSCbits.ANSC7 = analogOrDigital;
+        ANSELCbits.ANSC7 = analogOrDigital;
     }
     else if (pin == 21) { // PICKIT_5
-        ANSBbits.ANSB0 = analogOrDigital;
+        ANSELBbits.ANSB0 = analogOrDigital;
     }
     else if (pin == 22) { // PICKIT_4
-        ANSBbits.ANSB1 = analogOrDigital;
+        ANSELBbits.ANSB1 = analogOrDigital;
     }
     else if (pin == 23) {
-        ANSBbits.ANSB2 = analogOrDigital;
+        ANSELBbits.ANSB2 = analogOrDigital;
     }
     else if (pin == 24) {
-        ANSBbits.ANSB3 = analogOrDigital;
+        ANSELBbits.ANSB3 = analogOrDigital;
     }
     else if (pin == 25) {
-        ANSBbits.ANSB4 = analogOrDigital;
+        ANSELBbits.ANSB4 = analogOrDigital;
     }
     else if (pin == 26) {
-        ANSBbits.ANSB5 = analogOrDigital;
+        ANSELBbits.ANSB5 = analogOrDigital;
     }
     else if (pin == 27) {
-        ANSBbits.ANSB6 = analogOrDigital;
+        ANSELBbits.ANSB6 = analogOrDigital;
     }
     else if (pin == 28) {
-        ANSBbits.ANSB7 = analogOrDigital;
+        ANSELBbits.ANSB7 = analogOrDigital;
     }
 
 }
