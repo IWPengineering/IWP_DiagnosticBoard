@@ -1,6 +1,6 @@
 /*
  * File:   Main.c
- * Author: ns1307
+ * Author: Sandra Snozzi, Nicholas Sum, Dr Fish
  *
  * Created on November 27, 2017, 3:52 PM
  */
@@ -76,8 +76,8 @@
 #include <stdlib.h>
 #include <math.h>
 #include <string.h>
-#include <p18F26K40.h>
-#include "Pin_Manager.h" // CHECK HAD ERROR
+#include <p18LF26K40.h>
+#include "Pin_Manager.h"
 
 int __attribute__ ((space(eedata))) eeData; // Global variable located in EEPROM
 
@@ -520,27 +520,14 @@ void ClearWatchDogTimer(void){
 }
 
 
-/**
-void delayMs(int ms) {
-    int myIndex;
-    while (ms > 0) {
-        myIndex = 0;
-        while (myIndex < 667) {
-            myIndex++;
-        }
-        ms--;
-    }
-}
-  **/
-
 void main(void) {
     
-    TRISBbits.TRISB6 = 0;
+    TRISBbits.TRISB4 = 0;
     
     while(1) {
-        PORTBbits.RB6 = 1;
+        PORTBbits.RB4 = 0;
         delayMs(1000);
-        PORTBbits.RB6 = 0;
+        PORTBbits.RB4 = 0;
         delayMs(2000);
     }
     
