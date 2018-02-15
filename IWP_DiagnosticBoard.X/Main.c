@@ -25,7 +25,7 @@
 #pragma config BOREN = SBORDIS  // Brown-out Reset Enable bits (Brown-out Reset enabled , SBOREN bit is ignored)
 
 // CONFIG2H
-#pragma config BORV = VBOR_190  // Brown Out Reset Voltage selection bits (Brown-out Reset Voltage (VBOR) set to 1.90V)
+//#pragma config BORV = VBOR_190  // Brown Out Reset Voltage selection bits (Brown-out Reset Voltage (VBOR) set to 1.90V)
 #pragma config ZCD = OFF        // ZCD Disable bit (ZCD disabled. ZCD can be enabled by setting the ZCDSEN bit of ZCDCON)
 #pragma config PPS1WAY = ON     // PPSLOCK bit One-Way Set Enable bit (PPSLOCK bit can be cleared and set only once; PPS registers remain locked after one clear/set cycle)
 #pragma config STVREN = ON      // Stack Full/Underflow Reset Enable bit (Stack full/underflow will cause Reset)
@@ -142,6 +142,7 @@ void initialization(void) {
     ANSELC = 0;
     TRISC = 0xFFFF; 
 
+    
     // Timer control
         // Timer control
     TMR1CLKbits.CS = 3;  // Selects the timer source as the High Frequency Internal Oscillator (4Mhz)
@@ -539,9 +540,9 @@ void main(void) {
     
     while(1) {
         PORTBbits.RB6 = 1;
-        delayMs(1000);
-        PORTBbits.RB6 = 0;
         delayMs(2000);
+        PORTBbits.RB6 = 0;
+        delayMs(1000);
     }
     
     /******
