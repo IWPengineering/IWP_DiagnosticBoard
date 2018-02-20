@@ -535,14 +535,14 @@ void delayMs(int ms) {
   **/
 
 void main(void) {
-    
-    TRISBbits.TRISB6 = 0;
+    initialization();
+    TRISBbits.TRISB4 = 0;
     
     while(1) {
-        PORTBbits.RB6 = 1;
+        PORTBbits.RB4 = 1;
+        delayMs(4000);
+        PORTBbits.RB4 = 0;
         delayMs(2000);
-        PORTBbits.RB6 = 0;
-        delayMs(1000);
     }
     
     /******
