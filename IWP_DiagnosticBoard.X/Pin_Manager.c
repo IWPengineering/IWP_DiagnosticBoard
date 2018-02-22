@@ -6,7 +6,7 @@
  */
 
 
-#include "xc.h" 
+#include "xc.h"
 #include "Pin_Manager.h"
 
 
@@ -180,67 +180,67 @@ void digitalPinSet(int pin, int set) // 1 for high, 0 for low
 void specifyAnalogPin(int pin, int analogOrDigital) // analogOrDigital = 1 if analog, 0 is digital
 {
 //    if (pin == 5) { // WPS_OUT
-//        ANSELAbits.ANSA3 = analogOrDigital; 
+//        ANSAbits.ANSA3 = analogOrDigital; 
 //    }
 //    else if (pin == 6) { // ADXL_335_X
-//        ANSELAbits.ANSA4 = analogOrDigital;
+//        ANSAbits.ANSA4 = analogOrDigital;
 //    }
 //    else if (pin == 7) { // ADXL_335_Y
-//        ANSELAbits.ANSA5 = analogOrDigital;
+//        ANSAbits.ANSA5 = analogOrDigital;
 //    }
 //    else if (pin == 9) {
-//        ANSELAbits.ANSA7 = analogOrDigital;
+//        ANSAbits.ANSA7 = analogOrDigital;
 //    }
 //    else if (pin == 10) { // Push button
-//        ANSELAbits.ANSA6 = analogOrDigital;
+//        ANSAbits.ANSA6 = analogOrDigital;
 //    }
 ////    else if (pin == 11) { // CHECK THIS ON DATASHEET 
-////        ANSELCbits.ANSC0 = analogOrDigital;
+////        ANSCbits.ANSC0 = analogOrDigital;
 ////    }
 //    else if (pin == 12) { // PIC_PIN4
-//        ANSELCbits.ANSC1 = analogOrDigital;
+//        ANSCbits.ANSC1 = analogOrDigital;
 //    }
 //    else if (pin == 13) { // PIC_PIN5
-//        ANSELCbits.ANSC2 = analogOrDigital;
+//        ANSCbits.ANSC2 = analogOrDigital;
 //    }
 ////    else if (pin == 14) { // CHECK THIS ON DATASHEET
-////        ANSELCbits.ANSC3 = analogOrDigital;
+////        ANSCbits.ANSC3 = analogOrDigital;
 ////    }
 ////    else if (pin == 15) { // CHECK THIS ON DATASHEET
-////        ANSELCbits.ANSC4 = analogOrDigital;
+////        ANSCbits.ANSC4 = analogOrDigital;
 ////    }
 ////    else if (pin == 16) { // CHECK THIS ON DATASHEET
-////        ANSELCbits.ANSC5 = analogOrDigital;
+////        ANSCbits.ANSC5 = analogOrDigital;
 ////    }
 //    else if (pin == 17) { // TX
-//        ANSELCbits.ANSC6 = analogOrDigital;
+//        ANSCbits.ANSC6 = analogOrDigital;
 //    }
 //    else if (pin == 18) { // RX
-//        ANSELCbits.ANSC7 = analogOrDigital;
+//        ANSCbits.ANSC7 = analogOrDigital;
 //    }
 //    else if (pin == 21) { // PICKIT_5
-//        ANSELBbits.ANSB0 = analogOrDigital;
+//        ANSBbits.ANSB0 = analogOrDigital;
 //    }
 //    else if (pin == 22) { // PICKIT_4
-//        ANSELBbits.ANSB1 = analogOrDigital;
+//        ANSBbits.ANSB1 = analogOrDigital;
 //    }
 //    else if (pin == 23) {
-//        ANSELBbits.ANSB2 = analogOrDigital;
+//        ANSBbits.ANSB2 = analogOrDigital;
 //    }
 //    else if (pin == 24) {
-//        ANSELBbits.ANSB3 = analogOrDigital;
+//        ANSBbits.ANSB3 = analogOrDigital;
 //    }
 //    else if (pin == 25) {
-//        ANSELBbits.ANSB4 = analogOrDigital;
+//        ANSBbits.ANSB4 = analogOrDigital;
 //    }
 //    else if (pin == 26) {
-//        ANSELBbits.ANSB5 = analogOrDigital;
+//        ANSBbits.ANSB5 = analogOrDigital;
 //    }
 //    else if (pin == 27) {
-//        ANSELBbits.ANSB6 = analogOrDigital;
+//        ANSBbits.ANSB6 = analogOrDigital;
 //    }
 //    else if (pin == 28) {
-//        ANSELBbits.ANSB7 = analogOrDigital;
+//        ANSBbits.ANSB7 = analogOrDigital;
 //    }
     // NEED TO FIX CHECK DATASHEET
 
@@ -265,7 +265,11 @@ void pinSampleSelectRegister(int pin) { //  A/D Sample Select Register (CHECK WH
 int digitalPinStatus(int pin)
 {
 //	int pinValue;
-//	if (pin == 2)
+//	if (pin == 1)
+//	{
+//		pinValue = PORTAbits.RA5;
+//	}
+//	else if (pin == 2)
 //	{
 //		pinValue = PORTAbits.RA0;
 //	}
@@ -275,90 +279,91 @@ int digitalPinStatus(int pin)
 //	}
 //	else if (pin == 4)
 //	{
-//		pinValue = PORTAbits.RA2;
+//		pinValue = PORTBbits.RB0;
 //	}
 //	else if (pin == 5)
 //	{
-//		pinValue = PORTBbits.RA3;
+//		pinValue = PORTBbits.RB1;
 //	}
 //	else if (pin == 6)
 //	{
-//		pinValue = PORTBbits.RA4;
+//		pinValue = PORTBbits.RB2;
 //	}
 //	else if (pin == 7)
 //	{
-//		pinValue = PORTBbits.RA5;
+//		pinValue = PORTBbits.RB3;
 //	}
-//	// Pin8 - Always VSS for PIC18LF26K40 - Do nothing
+//	// Pin8 - Always VSS for PIC24FV32KA302 - Do nothing
 //	else if (pin == 9)
 //	{
-//		pinValue = PORTAbits.RA7;
+//		pinValue = PORTAbits.RA2;
 //	}
 //	else if (pin == 10)
 //	{
-//		pinValue = PORTAbits.RA6;
+//		pinValue = PORTAbits.RA3;
 //	}
 //	else if (pin == 11)
 //	{
-//		pinValue = PORTBbits.RC0;
+//		pinValue = PORTBbits.RB4;
 //	}
 //	else if (pin == 12)
 //	{
-//		pinValue = PORTAbits.RC1;
+//		pinValue = PORTAbits.RA4;
 //	}
-//	else if (pin == 13)
-//	{
-//		pinValue = PORTBbits.RC2;
-//	}
+//	//Pin 13 - Always VDD for PIC24FV32KA302 - Do nothing
 //	else if (pin == 14)
-//	{
-//		pinValue = PORTBbits.RC3;
-//	}
-//	else if (pin == 15)
-//	{
-//		pinValue = PORTBbits.RC4;
-//	} 
-//	else if (pin == 16)
-//	{
-//		pinValue = PORTBbits.RC5;
-//	}//Usually reserved for I2C
-//	else if (pin == 17)
-//	{
-//		pinValue = PORTBbits.RC6;
-//	}
-//	else if (pin == 18)
-//	{
-//		pinValue = PORTAbits.RC7;
-//	}
-//	// Pin 19 - Always Vss for PIC18LF26K40 - Do nothing
-//  // Pin 20 - Always VDD for PIK18LF26K40 - Do nothing
-//	else if (pin == 21)
-//	{
-//		pinValue = PORTBbits.RB0;
-//	}
-//	else if (pin == 22)
-//	{
-//		pinValue = PORTBbits.RB1;
-//	}
-//	else if (pin == 23)
-//	{
-//		pinValue = PORTBbits.RB2;
-//	}
-//	else if (pin == 24)
-//	{
-//		pinValue = PORTBbits.RB3;
-//	}
-//	else if (pin == 25)
-//	{
-//		pinValue = PORTBbits.RB4;
-//	}
-//	else if (pin == 26)
 //	{
 //		pinValue = PORTBbits.RB5;
 //	}
-//  // Pins 27 and 28 are for the Pickit 
+//	else if (pin == 15)
+//	{
+//		pinValue = PORTBbits.RB6;
+//	}
+//	else if (pin == 16)
+//	{
+//		pinValue = PORTBbits.RB7;
+//	} //Usually reserved for TX
+//	else if (pin == 17)
+//	{
+//		pinValue = PORTBbits.RB8;
+//	}//Usually reserved for I2C
+//	else if (pin == 18)
+//	{
+//		pinValue = PORTBbits.RB9;
+//	}//Usually Reserved for I2C
+//	else if (pin == 19)
+//	{
+//		pinValue = PORTAbits.RA7;
+//	}
+//	// Pin 20 - Always vCap for PIC24FV32KA302 - Do nothing
+//	else if (pin == 21)
+//	{
+//		pinValue = PORTBbits.RB10;
+//	}
+//	else if (pin == 22)
+//	{
+//		pinValue = PORTBbits.RB11;
+//	}
+//	else if (pin == 23)
+//	{
+//		pinValue = PORTBbits.RB12;
+//	}
+//	else if (pin == 24)
+//	{
+//		pinValue = PORTBbits.RB13;
+//	}
+//	else if (pin == 25)
+//	{
+//		pinValue = PORTBbits.RB14;
+//	}
+//	else if (pin == 26)
+//	{
+//		pinValue = PORTBbits.RB15;
+//	}
 	//return pinValue;
     return 1; // CHANGE
+	// Pin 27 - Always VSS for PIC24FV32KA302 - Do nothing
+	// Pin 28 - Always VDD for PIC24FV32KA302 - Do nothing
 }
 
 
