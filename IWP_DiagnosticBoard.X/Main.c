@@ -77,7 +77,7 @@
 #include <math.h>
 #include <string.h>
 #include <p18F26K40.h>
-#include "Pin_Manager.h" // CHECK HAD ERROR
+#include "Pin_Manager.h"
 
 int __attribute__ ((space(eedata))) eeData; // Global variable located in EEPROM
 
@@ -91,6 +91,7 @@ int __attribute__ ((space(eedata))) eeData; // Global variable located in EEPROM
     const int upstrokeInterval = 10; // The number of milliseconds to delay before reading the upstroke
     const float PI = 3.141592;
     const float angleThresholdSmall = 0.1; //number close to zero to determine if handle is moving w/o interpreting accelerometer noise as movement.
+    const float handleMovementThreshold = 5.0; // When the handle has moved this many degrees from rest, we start calculating priming 
     float angle1 = 0;
     float angle2 = 0;
     float angle3 = 0;
@@ -279,47 +280,6 @@ void delayMs(int ms) { // Actually using the timer
 //    
 //}
 //
-///*********************************************************************
-// * Function: getHandleAngle()
-// * Input: None
-// * Output: Float
-// * Overview: Returns the average angle of the pump. The accelerometer
-//should be oriented on the pump handle so that when the
-//pump handle (the side the user is using) is down (water
-//present), the angle is positive. When the pump handle
-//(the side the user is using) is up (no water present),
-//the angle is negative.Gets a snapshot of the current sensor values.
-// * Note: Library
-// * NOTE2: It turns out that averaging the handle angles would be the most accurate way to report pumping
-// * TestDate: TBD
-// ********************************************************************/
-//float getHandleAngle() {
-//
-//        signed int xValue = readAdc(xAxis) - signedNumAdjustADC; 
-//        signed int yValue = readAdc(yAxis) - signedNumAdjustADC; 
-//        float angle = atan2(yValue, xValue) * (180 / PI); //returns angle in degrees 
-//        // Calculate and return the angle of the pump handle
-//        if (angle > 20) {
-//            angle = 20.0;
-//        } else if (angle < -30) {
-//            angle = -30.0;
-//        }
-//        angle10 = angle9;
-//        angle9 = angle8;
-//        angle8 = angle7;
-//        angle7 = angle6;
-//        angle6 = angle5;
-//        angle5 = angle4;
-//        angle4 = angle3;
-//        angle3 = angle2;
-//        angle2 = angle1;
-//        angle1 = angle;
-//
-//        float averageAngle = (angle1 + angle2 + angle3 + angle4 + angle5 + angle6 + angle7 + angle8 + angle9 + angle10) / 10.0;
-//
-//        return averageAngle;
-//        //return angle;
-//}
 //
 ///*********************************************************************
 // * Function: int EEProm_Read_Int(int addr);
@@ -429,7 +389,21 @@ int batteryLevelPin = 11;
 int TimeSinceLastHourCheck = 0;  // we check this when we have gone around the no pumping loop enough times that 1 minute has gone by
 int hour = 0; // Hour of day
 
-/*******
+
+///*********************************************************************
+// * Function: getHandleAngle()
+// * Input: None
+// * Output: Float
+// * Overview: Returns the average angle of the pump. The accelerometer
+//should be oriented on the pump handle so that when the
+//pump handle (the side the user is using) is down (water
+//present), the angle is positive. When the pump handle
+//(the side the user is using) is up (no water present),
+//the angle is negative.Gets a snapshot of the current sensor values.
+// * Note: Library
+// * NOTE2: It turns out that averaging the handle angles would be the most accurate way to report pumping
+// * TestDate: TBD
+// ********************************************************************/
 float getHandleAngle() {
 
     signed int xValue = readAdc(xAxis) - signedNumAdjustADC; 
@@ -456,7 +430,7 @@ float getHandleAngle() {
 
     return averageAngle;
 }
-  **********/
+
 
 /*******
 int readAdc(int channel) //check with accelerometer
@@ -520,33 +494,21 @@ void ClearWatchDogTimer(void){
      ClrWdt();
 }
 
-
-/**
-void delayMs(int ms) {
-    int myIndex;
-    while (ms > 0) {
-        myIndex = 0;
-        while (myIndex < 667) {
-            myIndex++;
-        }
-        ms--;
-    }
-}
-  **/
-
 void main(void) {
     initialization();
+    
+    /**
     TRISBbits.TRISB4 = 0;
     
-    while(1) {
+    while(1) {                      //Turn on led test
         PORTBbits.RB4 = 1;
         delayMs(4000);
         PORTBbits.RB4 = 0;
         delayMs(2000);
     }
+     **/
     
-    /******
-    int __attribute__ ((space(eedata))) eeData; // Global variable located in EEPROM
+    //int __attribute__ ((space(eedata))) eeData; // Global variable located in EEPROM
     
     // Initialize
     
@@ -583,10 +545,10 @@ void main(void) {
 				deltaAngle *= -1;
 			}
             if(deltaAngle > handleMovementThreshold){            // The total movement of the handle from rest has been exceeded
-				//handleMovement = 1;     //TURN ON LED
+				  //TURN ON LED
 			}
     }
-    *******************/
+    }
         
         
         
