@@ -112,7 +112,8 @@
 // *****************************************************
 //              Function Prototype
 // *****************************************************
-    
+int readAdc(int pin);
+// void initAdc(void);
 //void ClearWatchDogTimer(void);
 //void EEProm_Write_Float(unsigned int ee_addr, void *obj_p);
 //float getHandleAngle();
@@ -150,6 +151,8 @@ void initialization(void) {
     T1CONbits.CKPS = 3;  // Prescales the clock input by 1:8 so we are now at 500khz timer clock
     T1CONbits.RD16 = 1;  // Enables 16bit read/write of TMR1
     T1CONbits.ON = 1;    // Turns TMR1 ON
+    
+    
 
     
     // UART config
@@ -374,6 +377,78 @@ int TimeSinceLastHourCheck = 0;  // we check this when we have gone around the n
 int hour = 0; // Hour of day
 
 
+/*********************************************************************
+ * Function: initAdc()
+ * Input: None
+ * Output: None
+ * Overview: Initializes Analog to Digital Converter
+ * Note: Pic Dependent
+ * TestDate: 06-02-2014
+ * Code Update Date: 12-8-2016
+ ********************************************************************/
+//void initAdc() {
+//    ADCON1 = 0; // Default to all 0s
+//    
+//    ADCON0bits.ADON = 0; // Ensure the ADC is disabled before configuration
+//    ADCON0bits.ADFM = 1; // results are right justified
+//    //AD0CON1bits.SSRC = 0; // The SAMP bit must be cleared by software    ???
+//    //AD1CON1bits.SSRC = 0x7; // The SAMP bit is cleared after SAMC number (see
+//    // AD3CON) of TAD clocks after SAMP bit being set
+//    //AD1CON1bits.ASAM = 0; // Sampling begins when the SAMP bit is manually set
+//    ADCON0bits.ADCONT = 0; // Don't Sample yet
+//    // Leave AD1CON2 at defaults
+//    // Vref High = Vcc Vref Low = Vss
+//    // Use AD1CHS (see below) to select which channel to convert, don't
+//    // scan based upon AD1CSSL
+//    ADREFbits.ADPREF = 0;  //Vref+ is connected to Vdd
+//    // AD3CON
+//    // This device needs a minimum of Tad = 600ns.
+//    // If Tcy is actually 1/8Mhz = 125ns, so we are using 3Tcy
+//    //AD1CON3 = 0x1F02; // Sample time = 31 Tad, Tad = 3Tcy
+//    ADCON0bits.ADCS = 0; //Clock supplied by Fosc divided according to ADCLK register
+//    //AD1CON3bits.SAMC = 0x1F; // Sample time = 31 Tad (11.6us charge time)
+//    //AD1CON3bits.ADCS = 0x2; // Tad = 3Tcy
+//    // Conversions are routed through MuxA by default in AD1CON2
+//    ADREFbits.ADNREF = 0;  //ADC Reference selection bit. Vref connected to AVss
+//    //AD1CHSbits.CH0NA = 0; // Use Vss as the conversion reference
+//    //AD1CSSL = 0; // No inputs specified since we are not in SCAN mode
+//    // AD1CON2
+//}
+
+
+int readAdc(int pin) //check with accelerometer
+{
+    switch (pin) {
+        
+        case 6:
+            ANSELAbits.ANSELA4 = 1; //Setting pin 6 (xAix) to analog
+            TRISAbits.TRISA4 = 1; //Setting pin 6 an input
+            ADPCHbits.ADPCH = 4; //connect pin 6 to A/D converter
+          
+            //ANSBbits.ANSB13 = 1; // AN11 is analog
+            //TRISBbits.TRISB13 = 1; // AN11 is an input
+            //AD1CHSbits.CH0SA = 11; //Connect AN11 as the S/H input (sample and hold)
+            break;
+        case 7:
+            ANSELAbits.ANSELA5 = 1; //Setting pin 7 (yAxis) to analog
+            TRISAbits.TRISA5 = 1; //Setting pin 7 an input
+            ADPCHbits.ADPCH = 5; //connect pin 7 to A/D converter
+        
+            //PORTBbits.RB12 = 1; // AN12 is analog ***I changed this to ANSBbits.ANSBxx 03-31-2015
+            //TRISBbits.TRISB12 = 1; // AN12 is an input
+            //AD1CHSbits.CH0SA = 12; // Connect AN12 as the S/H input
+            break;
+    
+    }
+    ADCON0bits.ADON = 1; // Turn on ADC   
+    ADCON0bits.ADCONT = 1;   //Enables continuous sampling
+    while (!ADCON0bits.DONE) {
+    }
+    unsigned int adcValue = ADRES;  //From ADC result register
+    return adcValue;
+}
+
+
 ///*********************************************************************
 // * Function: getHandleAngle()
 // * Input: None
@@ -415,48 +490,14 @@ float getHandleAngle() {
     return averageAngle;
 }
 
-
-
-int readAdc(int pin) //check with accelerometer
-{
-    switch (pin) {
-        
-        case 6:
-            ANSELAbits.ANSELA4 = 1; //Setting pin 6 (xAix) to analog
-            TRISAbits.TRISA4 = 1; //Setting pin 6 an input
-            ADPCHbits.ADPCH = 4; //connect pin 6 to A/D converter
-          
-            //ANSBbits.ANSB13 = 1; // AN11 is analog
-            //TRISBbits.TRISB13 = 1; // AN11 is an input
-            //AD1CHSbits.CH0SA = 11; //Connect AN11 as the S/H input (sample and hold)
-            break;
-        case 7:
-            ANSELAbits.ANSELA5 = 1; //Setting pin 7 (yAxis) to analog
-            TRISAbits.TRISA5 = 1; //Setting pin 7 an input
-            ADPCHbits.ADPCH = 5; //connect pin 7 to A/D converter
-        
-            //PORTBbits.RB12 = 1; // AN12 is analog ***I changed this to ANSBbits.ANSBxx 03-31-2015
-            //TRISBbits.TRISB12 = 1; // AN12 is an input
-            //AD1CHSbits.CH0SA = 12; // Connect AN12 as the S/H input
-            break;
-    
-    }
-    ADCON0bits.ADON = 1; // Turn on ADC   
-    ADCON0bits.ADCONT = 1;   //Enables continuous sampling
-    while (!ADCON0bits.DONE) {
-    }
-    unsigned int adcValue = ADRES;  //From ADC result register
-    return adcValue;
-}
-
 void ClearWatchDogTimer(void){
      ClrWdt();
 }
 
 void main(void) {
     initialization();
-    
-    /**
+   // initAdc();
+    /****
     TRISBbits.TRISB4 = 0;
     
     while(1) {                      //Turn on led test
@@ -465,10 +506,8 @@ void main(void) {
         PORTBbits.RB4 = 0;
         delayMs(2000);
     }
-     **/
-    
+    ****/
     //int __attribute__ ((space(eedata))) eeData; // Global variable located in EEPROM
-    
     // Initialize
     TRISBbits.TRISB3 = 0;
     TRISBbits.TRISB4 = 0;
@@ -494,7 +533,7 @@ void main(void) {
             ClearWatchDogTimer();     // We stay in this loop if no one is pumping so we need to clear the WDT  
             TimeSinceLastHourCheck++;
             if(TimeSinceLastHourCheck > 5000){ // If no one is pumping this works out to be about every minute
-                hour = BcdToDec(getHourI2C());    //I2C stuff
+                //hour = BcdToDec(getHourI2C());    //I2C stuff
                 TimeSinceLastHourCheck = 0;
             }// Set the handle movement to 0 (handle is not moving)
             
@@ -519,8 +558,7 @@ void main(void) {
     }
         
         
-        
-
+  
     
     
     
