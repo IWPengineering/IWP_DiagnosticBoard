@@ -1,6 +1,6 @@
 /*
  * File:   Main.c
- * Author: ns1307
+ * Author: SandraSnozzi NicholasSum DrFish
  *
  * Created on November 27, 2017, 3:52 PM
  */
@@ -79,7 +79,7 @@
 #include <p18F26K40.h>
 #include "Pin_Manager.h"
 
-int __attribute__ ((space(eedata))) eeData; // Global variable located in EEPROM
+//int __attribute__ ((space(eedata))) eeData; // Global variable located in EEPROM
 
 // ****************************************************
 //            Constants
@@ -221,23 +221,7 @@ void delayMs(int ms) { // Actually using the timer
     while(TMR1<end_count){}
 }
 
-///*********************************************************************
-// * Function: ClearWatchDogTimer()
-// * Input: none
-// * Output: none
-// * Overview: You can use just ClrWdt() as a command.  However, I read in a forum 
-// *           http://www.microchip.com/forums/m122062.aspx
-// *           that since ClrWdt() expands to an asm command, the presence of the 
-// *          asm will stop the compiler from optimizing any routine that it is a 
-// *          part of.  Since I want to call this in Main, that would be a problem
-// * Note: Library
-// * TestDate: 1-2-2017
-// ********************************************************************/
-//void ClearWatchDogTimer(void){
-//     ClrWdt();
-//}
-//
-///*********************************************************************
+
 // * Function: EEProm_Write_Float(unsigned int ee_addr, void *obj_p)
 // * Input: ee_addr - the location to write to relative to the start of EEPROM
 // *                  it is assumed that you are referring to the # of the float 
@@ -432,63 +416,38 @@ float getHandleAngle() {
 }
 
 
-/*******
-int readAdc(int channel) //check with accelerometer
-{
-    switch (channel) {
-        case 0:
-            specifyAnalogPin(depthSensorPin, 1); //make depthSensor Analog
-            pinDirectionIO(depthSensorPin, 1);
-            pinSampleSelectRegister(depthSensorPin);
-            break;
-        case 2: //Currently unused, may be used in the future.
-            specifyAnalogPin(Pin4, 1); // makes Pin4 analog
-            pinDirectionIO(Pin4, 1); // Pin4 in an input
-            pinSampleSelectRegister(Pin4); // Connect Pin4 as the S/H input
 
-            //ANSBbits.ANSB0 = 1; // AN2 is analog
-            //TRISBbits.TRISB0 = 1; // AN2 is an input
-            //AD1CHSbits.CH0SA = 2; // Connect AN2 as the S/H input
-            break;
-        case 4:
-            specifyAnalogPin(rxPin, 1); // make rx analog
-            pinDirectionIO(rxPin, 1); // makes rxPin an input
-            pinSampleSelectRegister(rxPin); // Connect rxPin as the S/H input
-            //ANSBbits.ANSB2 = 1; // AN4 is analog
-            //TRISBbits.TRISB2 = 1; // AN4 is an input
-            //AD1CHSbits.CH0SA = 4; // Connect AN4 as the S/H input
-            break;
-        case 11:
-            specifyAnalogPin(xAxisAccelerometerPin, 1); // makes xAxis analog
-            pinDirectionIO(xAxisAccelerometerPin, 1); // makes xAxis an input
-            pinSampleSelectRegister(xAxisAccelerometerPin); // Connect xAxis as the S/H input
+int readAdc(int pin) //check with accelerometer
+{
+    switch (pin) {
+        
+        case 6:
+            ANSELAbits.ANSELA4 = 1; //Setting pin 6 (xAix) to analog
+            TRISAbits.TRISA4 = 1; //Setting pin 6 an input
+            ADPCHbits.ADPCH = 4; //connect pin 6 to A/D converter
+          
             //ANSBbits.ANSB13 = 1; // AN11 is analog
             //TRISBbits.TRISB13 = 1; // AN11 is an input
             //AD1CHSbits.CH0SA = 11; //Connect AN11 as the S/H input (sample and hold)
             break;
-        case 12:
-            specifyAnalogPin(yAxisAccelerometerPin, 1); // makes yAxis analog
-            pinDirectionIO(yAxisAccelerometerPin, 1); // makes yAxis an input
-            pinSampleSelectRegister(yAxisAccelerometerPin); // Connect yAxis as the S/H input
+        case 7:
+            ANSELAbits.ANSELA5 = 1; //Setting pin 7 (yAxis) to analog
+            TRISAbits.TRISA5 = 1; //Setting pin 7 an input
+            ADPCHbits.ADPCH = 5; //connect pin 7 to A/D converter
+        
             //PORTBbits.RB12 = 1; // AN12 is analog ***I changed this to ANSBbits.ANSBxx 03-31-2015
             //TRISBbits.TRISB12 = 1; // AN12 is an input
             //AD1CHSbits.CH0SA = 12; // Connect AN12 as the S/H input
             break;
-        case 15:
-            specifyAnalogPin(batteryLevelPin, 1); // makes batteryLevelPin analog
-            pinDirectionIO(batteryLevelPin, 1); // makes batteryLevelPin an input
-            pinSampleSelectRegister(batteryLevelPin); // Connect batteryLevelPin
-            break;
+    
     }
-    AD1CON1bits.ADON = 1; // Turn on ADC   
-    AD1CON1bits.SAMP = 1;
-    while (!AD1CON1bits.DONE) {
+    ADCON0bits.ADON = 1; // Turn on ADC   
+    ADCON0bits.ADCONT = 1;   //Enables continuous sampling
+    while (!ADCON0bits.DONE) {
     }
-    unsigned int adcValue = ADC1BUF0;
+    unsigned int adcValue = ADRES;  //From ADC result register
     return adcValue;
 }
-
-**/
 
 void ClearWatchDogTimer(void){
      ClrWdt();
@@ -511,7 +470,8 @@ void main(void) {
     //int __attribute__ ((space(eedata))) eeData; // Global variable located in EEPROM
     
     // Initialize
-    
+    TRISBbits.TRISB3 = 0;
+    TRISBbits.TRISB4 = 0;
     // Clear any data
     int handleMovement = 0; // Either 1 or no 0 if the handle moving upward
     float angleCurrent = 0; // Stores the current angle of the pump handle
@@ -545,17 +505,22 @@ void main(void) {
 				deltaAngle *= -1;
 			}
             if(deltaAngle > handleMovementThreshold){            // The total movement of the handle from rest has been exceeded
-				  //TURN ON LED
-			}
+				  PORTBbits.RB4 = 1;
+            }else{
+                  PORTBbits.RB4 = 0;
+			}     
     }
+        
+                 // Do we have water? 
+    TRISBbits.TRISB3 = 0;
+     if (readWaterSensor()) {
+          PORTBbits.RB3 = 1;
+     }
     }
         
         
         
-    // Do we have water? 
-    // if (readWaterSensor()) {
-    //      light up LED 
-    // }
+
     
     
     
