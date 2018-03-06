@@ -113,15 +113,16 @@
 //              Function Prototype
 // *****************************************************
 int readAdc(int pin);
-// void initAdc(void);
+void initAdc(void);
+void initialization(void);
 //void ClearWatchDogTimer(void);
 //void EEProm_Write_Float(unsigned int ee_addr, void *obj_p);
-//float getHandleAngle();
+float getHandleAngle();
 //int EEProm_Read_Int(int addr);
 //void EEProm_Read_Float(int ee_addr, void *obj_p);
-//int readWaterSensor(void);
-//void delayMs(int ms);
-//char BcdToDec(char val);
+int readWaterSensor(void);
+void delayMs(int ms);
+char BcdToDec(char val);
 //
 //
 /*********************************************************************
