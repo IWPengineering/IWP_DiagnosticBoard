@@ -146,14 +146,17 @@ void initialization(void) {
 
     
     // Timer control
-        // Timer control
+    // For WPS
     TMR1CLKbits.CS = 3;  // Selects the timer source as the High Frequency Internal Oscillator (4Mhz)
-    T1CONbits.CKPS = 3;  // Prescales the clock input by 1:8 so we are now at 500khz timer clock
-    T1CONbits.RD16 = 1;  // Enables 16bit read/write of TMR1
+    T1CONbits.CKPS = 3;  // Prescales the clock input by 1:8 so we are now at 500khz timer clock (a lot faster)
+    //T1CONbits.RD16 = 1;  // Enables 16bit read/write of TMR1 (NOT USED IN IWP FOR WPS)
     T1CONbits.ON = 1;    // Turns TMR1 ON
     
-    
-
+    // For getHandleAngle()
+    TMR3CLKbits.CS = 3; // Timer2 Timer Clock Source Selection bits-High Frequency Internal Oscillator (4Mhz)
+    T3CONbits.RD16 = 1; // Enables register read/write of Timer in one 16-bit operation 
+    T3CONbits.CKPS = 3; // 1:8 Prescaler 500kHz timer clock
+    T3CONbits.ON = 1; // Turns on Timer2
     
     // UART config
 //    U1MODE = 0x8000;  
