@@ -76,7 +76,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include <string.h>
-#include <p18F26K40.h>
+#include <p18LF26K40.h>
 #include "Pin_Manager.h"
 
 //int __attribute__ ((space(eedata))) eeData; // Global variable located in EEPROM
@@ -85,8 +85,8 @@
 //            Constants
 // *****************************************************
 
-    const int xAxis = 11; // analog pin connected to x axis of accelerometer ** MAY NEED TO CHANGE
-    const int yAxis = 12; // analog pin connected to y axis of accelerometer ** MAY NEED TO CHANGE
+    const int xAxis = 6; // analog pin connected to x axis of accelerometer ** MAY NEED TO CHANGE
+    const int yAxis = 7; // analog pin connected to y axis of accelerometer ** MAY NEED TO CHANGE
     const int signedNumAdjustADC = 511; // Used to divide the total range of the output of the 10 bit ADC into positive and negative range.
     const int upstrokeInterval = 10; // The number of milliseconds to delay before reading the upstroke
     const float PI = 3.141592;
@@ -202,6 +202,8 @@ void initialization(void) {
     angle9 = getHandleAngle();
     angle10 = getHandleAngle();
  */
+    
+    initAdc();   
 }
 
     
@@ -216,16 +218,20 @@ void initialization(void) {
  * TestDate: not tested
  ********************************************************************/
 void delayMs(int ms) { // Actually using the timer
+    int debug = 0;
     int end_count;
-    while(ms > 100){ 
+    while(ms > 60){ 
         TMR1 = 0;
-        while(TMR1 < 5000){} //wait 1000ms
-        ms = ms - 100;
+        while(TMR1 < 30000){} //wait 60ms
+        ms = ms - 60;
     }
     // now we fit within the timer's range
     end_count = ms*500; // assumes TC1 is clocked by 500khz
     TMR1 = 0;
-    while(TMR1<end_count){}
+    while(TMR1 < 5) {
+    //while(TMR1<end_count){
+        debug = TMR1;
+    }
 }
 
 
@@ -340,8 +346,7 @@ int readWaterSensor(void) // RA3 is one water sensor
     int WaterPresent = 0;  //assume there is no water
    // turn WPS on and off in the Main loop 
     delayMs(5);  //make sure the 555 has had time to turn on 
-    
-    
+    PORTBbits.RB4 = 1;
     //make sure you start at the beginning of the positive pulse
     TMR1 = 0;
     if (digitalPinStatus(waterPresenceSensorPin) == 1) {
@@ -387,46 +392,38 @@ int hour = 0; // Hour of day
  * Output: None
  * Overview: Initializes Analog to Digital Converter
  * Note: Pic Dependent
- * TestDate: 06-02-2014
- * Code Update Date: 12-8-2016
+ * TestDate: NA
  ********************************************************************/
-//void initAdc() {
-//    ADCON1 = 0; // Default to all 0s
-//    
-//    ADCON0bits.ADON = 0; // Ensure the ADC is disabled before configuration
-//    ADCON0bits.ADFM = 1; // results are right justified
-//    //AD0CON1bits.SSRC = 0; // The SAMP bit must be cleared by software    ???
-//    //AD1CON1bits.SSRC = 0x7; // The SAMP bit is cleared after SAMC number (see
-//    // AD3CON) of TAD clocks after SAMP bit being set
-//    //AD1CON1bits.ASAM = 0; // Sampling begins when the SAMP bit is manually set
-//    ADCON0bits.ADCONT = 0; // Don't Sample yet
-//    // Leave AD1CON2 at defaults
-//    // Vref High = Vcc Vref Low = Vss
-//    // Use AD1CHS (see below) to select which channel to convert, don't
-//    // scan based upon AD1CSSL
-//    ADREFbits.ADPREF = 0;  //Vref+ is connected to Vdd
-//    // AD3CON
-//    // This device needs a minimum of Tad = 600ns.
-//    // If Tcy is actually 1/8Mhz = 125ns, so we are using 3Tcy
-//    //AD1CON3 = 0x1F02; // Sample time = 31 Tad, Tad = 3Tcy
-//    ADCON0bits.ADCS = 0; //Clock supplied by Fosc divided according to ADCLK register
-//    //AD1CON3bits.SAMC = 0x1F; // Sample time = 31 Tad (11.6us charge time)
-//    //AD1CON3bits.ADCS = 0x2; // Tad = 3Tcy
-//    // Conversions are routed through MuxA by default in AD1CON2
-//    ADREFbits.ADNREF = 0;  //ADC Reference selection bit. Vref connected to AVss
-//    //AD1CHSbits.CH0NA = 0; // Use Vss as the conversion reference
-//    //AD1CSSL = 0; // No inputs specified since we are not in SCAN mode
-//    // AD1CON2
-//}
+void initAdc(void) {
+    
+    ADCON0bits.ADON = 0; // Ensure the ADC is disabled before configuration
+    
+    TRISAbits.TRISA4 = 1; //Make this an input
+    ANSELAbits.ANSELA4 = 1; //Makes RA4(pin 6) analog  X-axis
+    TRISAbits.TRISA5 = 1; //Make this an input
+    ANSELAbits.ANSELA4 = 1;  //Makes RAr(pin 7) analog  Y-axis
+    
+    //Choose reference voltages
+    ADREFbits.ADPREF = 0;  //Vref+ = Vdd
+    ADREFbits.ADNREF = 0;  //Vref- = GND
+    
+    //Choose clock source  (1 conversion = 24us)
+    ADCON0bits.ADCS = 0;  //Using internal F_osc 
+    ADCLK = 0;  //ADC Clock frequency = FOSC/(2*(n+1))
 
-
+    //The interrupt flag is ADIF bit in the PIRx
+    
+    //Result format
+    ADCON0bits.ADFM = 1;  //Right Justified - low bits are in ADRESL and upper 2 bits will be in ADREFH
+   
+}
+ 
+    
 int readAdc(int pin) //check with accelerometer
-{
+{ 
     switch (pin) {
         
         case 6:
-            ANSELAbits.ANSELA4 = 1; //Setting pin 6 (xAix) to analog
-            TRISAbits.TRISA4 = 1; //Setting pin 6 an input
             ADPCHbits.ADPCH = 4; //connect pin 6 to A/D converter
           
             //ANSBbits.ANSB13 = 1; // AN11 is analog
@@ -434,8 +431,6 @@ int readAdc(int pin) //check with accelerometer
             //AD1CHSbits.CH0SA = 11; //Connect AN11 as the S/H input (sample and hold)
             break;
         case 7:
-            ANSELAbits.ANSELA5 = 1; //Setting pin 7 (yAxis) to analog
-            TRISAbits.TRISA5 = 1; //Setting pin 7 an input
             ADPCHbits.ADPCH = 5; //connect pin 7 to A/D converter
         
             //PORTBbits.RB12 = 1; // AN12 is analog ***I changed this to ANSBbits.ANSBxx 03-31-2015
@@ -444,12 +439,15 @@ int readAdc(int pin) //check with accelerometer
             break;
     
     }
+    
     ADCON0bits.ADON = 1; // Turn on ADC   
-    ADCON0bits.ADCONT = 1;   //Enables continuous sampling
-    while (!ADCON0bits.DONE) {
-    }
+    ADCON0bits.ADCONT = 1;   // Enables continuous sampling
+    
+//    while (ADCON0bits.ADGO) { //ADGO = 0 means that conversion is finished
+//    }
     unsigned int adcValue = ADRES;  //From ADC result register
     return adcValue;
+    ADCON0bits.ADON = 0; // Turn off ADC   
 }
 
 
@@ -500,17 +498,44 @@ void ClearWatchDogTimer(void){
 
 void main(void) {
     initialization();
-   // initAdc();
-    /****
-    TRISBbits.TRISB4 = 0;
     
-    while(1) {                      //Turn on led test
-        PORTBbits.RB4 = 1;
-        delayMs(4000);
-        PORTBbits.RB4 = 0;
-        delayMs(2000);
-    }
-    ****/
+    float adcVoltage = getHandleAngle();
+    
+    
+//        TRISBbits.TRISB4 = 0;
+//    int counter = 0;
+//    int n = 0;
+//    while(n < 3) {
+//    while(counter < 20000) {                      //Turn on led test
+//        PORTBbits.RB4 = 1;
+//        counter = counter + 1;
+//        //delayMs(4000);                //Added counter instead of using delay which uses the clock. LED is turning on and off.
+//    }
+//    counter = 0;
+//    while(counter < 20000){
+//        PORTBbits.RB4 = 0;
+//        counter = counter + 1;
+//    }
+//    n = n + 1;
+//    }
+//    
+//    PORTBbits.RB4 = 0;
+
+        //delayMs(2000);
+
+//    TRISBbits.TRISB4 = 0;
+//    int counter = 0;
+//    while(counter < 3) {                      //Turn on led test
+//        PORTBbits.RB4 = 1;
+//        delayMs(8000);
+//        PORTBbits.RB4 = 0;
+//        delayMs(4000);
+//        counter = counter + 1;
+//    }
+//    
+//    PORTBbits.RB4 = 0;
+    
+ 
     //int __attribute__ ((space(eedata))) eeData; // Global variable located in EEPROM
     // Initialize
     TRISBbits.TRISB3 = 0;
@@ -530,7 +555,7 @@ void main(void) {
         anglePrevious = getHandleAngle();                            // Get the angle of the pump handle to measure against.  
                                                                      // This is our reference when looking for sufficient movement to say the handle is actually moving.  
                                                                      // the "moving" threshold is defined by handleMovementThreshold in IWPUtilities
-     
+        
         handleMovement = 0;                                          // Set the handle movement to 0 (handle is not moving)
 		while (handleMovement == 0)
 		{ 
@@ -543,29 +568,31 @@ void main(void) {
             
             delayMs(upstrokeInterval);                            // Delay for a short time
 			float newAngle = getHandleAngle();
-			float deltaAngle = newAngle - anglePrevious;        //WHY IS THIS RED...
+			float deltaAngle = newAngle - anglePrevious;        
 			if(deltaAngle < 0) {
 				deltaAngle *= -1;
 			}
+
             if(deltaAngle > handleMovementThreshold){            // The total movement of the handle from rest has been exceeded
 				  PORTBbits.RB4 = 1;
             }else{
-                  PORTBbits.RB4 = 0;
-			}     
+                  PORTBbits.RB4 = 1;
+			} 
+            PORTBbits.RB4 = 1;
+          
     }
         
                  // Do we have water? 
     TRISBbits.TRISB3 = 0;
      if (readWaterSensor()) {
-          PORTBbits.RB3 = 1;
+         PORTBbits.RB4 = 1;
+     }
+     else {
+         PORTBbits.RB4 = 1;
      }
     }
-        
-        
-  
-    
-    
-    
+     
+
     
 //    ClearWatchDogTimer(); // Changed from ClearWatchDogTime() which one is correct? )
 //    
