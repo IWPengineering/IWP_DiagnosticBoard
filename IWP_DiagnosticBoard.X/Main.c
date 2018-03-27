@@ -145,19 +145,26 @@ void initialization(void) {
     ANSELC = 0;
     TRISC = 0xFFFF; 
 
+    //DEBUGGING PURPOSES TMR 0
+    T0CON1bits.T0CS = 3;
+    T0CON0bits.T016BIT = 1;  // 16 bits 
+    T0CON1bits.T0CKPS = 8; //Prescaler 1:256
+    T0CON0bits.T0EN = 1;    // Turns TMR1 ON
+  
     
     // Timer control
     // For WPS
     TMR1CLKbits.CS = 3;  // Selects the timer source as the High Frequency Internal Oscillator (4Mhz)
     T1CONbits.CKPS = 3;  // Prescales the clock input by 1:8 so we are now at 500khz timer clock (a lot faster)
-    //T1CONbits.RD16 = 1;  // Enables 16bit read/write of TMR1 (NOT USED IN IWP FOR WPS)
+    T1CONbits.RD16 = 1;  // Enables 16bit read/write of TMR1 (NOT USED IN IWP FOR WPS)
     T1CONbits.ON = 1;    // Turns TMR1 ON
+    T1GCONbits.GE = 0; 
     
     // For getHandleAngle()
     TMR3CLKbits.CS = 3; // Timer2 Timer Clock Source Selection bits-High Frequency Internal Oscillator (4Mhz)
     T3CONbits.RD16 = 1; // Enables register read/write of Timer in one 16-bit operation 
     T3CONbits.CKPS = 3; // 1:8 Prescaler 500kHz timer clock
-    T3CONbits.ON = 1; // Turns on Timer2
+    T3CONbits.ON = 1; // Turns on Timer3
     
     // UART config
 //    U1MODE = 0x8000;  
@@ -220,18 +227,36 @@ void initialization(void) {
 void delayMs(int ms) { // Actually using the timer
     int debug = 0;
     int end_count;
+    
+    while(ms > 4000) {
+        TMR0 = 0;
+        while(TMR0 < 62500) {
+            ms = ms - 4000;
+        }
+    }
+    
+    end_count = ms * 15.625;
+    TMR0 = 0;
+    while(TMR0<end_count){
+        debug = TMR0;
+    }
+    //T1CONbits.ON = 1;
+    
+    /******
     while(ms > 60){ 
-        TMR1 = 0;
-        while(TMR1 < 30000){} //wait 60ms
+        TMR3 = 0;
+        while(TMR3 < 30000){} //wait 60ms
         ms = ms - 60;
     }
     // now we fit within the timer's range
     end_count = ms*500; // assumes TC1 is clocked by 500khz
-    TMR1 = 0;
-    while(TMR1 < 5) {
-    //while(TMR1<end_count){
-        debug = TMR1;
+    TMR3 = 0;
+    //while(TMR1 < 5) {
+    while(TMR3<end_count){
+        debug = TMR3;
     }
+     *****/
+    
 }
 
 
@@ -565,7 +590,7 @@ void main(void) {
                 //hour = BcdToDec(getHourI2C());    //I2C stuff
                 TimeSinceLastHourCheck = 0;
             }// Set the handle movement to 0 (handle is not moving)
-            
+            int sandy = 1; 
             delayMs(upstrokeInterval);                            // Delay for a short time
 			float newAngle = getHandleAngle();
 			float deltaAngle = newAngle - anglePrevious;        
@@ -576,9 +601,9 @@ void main(void) {
             if(deltaAngle > handleMovementThreshold){            // The total movement of the handle from rest has been exceeded
 				  PORTBbits.RB4 = 1;
             }else{
-                  PORTBbits.RB4 = 1;
+                  PORTBbits.RB4 = 0;
 			} 
-            PORTBbits.RB4 = 1;
+            //PORTBbits.RB4 = 1;
           
     }
         
@@ -588,7 +613,7 @@ void main(void) {
          PORTBbits.RB4 = 1;
      }
      else {
-         PORTBbits.RB4 = 1;
+         PORTBbits.RB4 = 0;
      }
     }
      
