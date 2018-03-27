@@ -369,24 +369,25 @@ void delayMs(int ms) { // Actually using the timer
 int readWaterSensor(void) // RA3 is one water sensor
 {
     int WaterPresent = 0;  //assume there is no water
+    PORTBbits.RB4 = 1;
    // turn WPS on and off in the Main loop 
     delayMs(5);  //make sure the 555 has had time to turn on 
-    PORTBbits.RB4 = 1;
+    //PORTBbits.RB4 = 1;
     //make sure you start at the beginning of the positive pulse
-    TMR1 = 0;
+    TMR0 = 0;
     if (digitalPinStatus(waterPresenceSensorPin) == 1) {
-        while ((digitalPinStatus(waterPresenceSensorPin))&&(TMR1 <= pulseWidthThreshold)) { //quit if the line is high for too long
+        while ((digitalPinStatus(waterPresenceSensorPin))&&(TMR0 <= pulseWidthThreshold)) { //quit if the line is high for too long
         }; 
     }
     //wait for rising edge
-    TMR1 = 0;
-    while ((digitalPinStatus(waterPresenceSensorPin) == 0)&&(TMR1 <= pulseWidthThreshold)) { //quit if the line is low for too long
+    TMR0 = 0;
+    while ((digitalPinStatus(waterPresenceSensorPin) == 0)&&(TMR0 <= pulseWidthThreshold)) { //quit if the line is low for too long
     }; 
     //Now measure the high part of the signal
-    TMR1 = 0;
-    while ((digitalPinStatus(waterPresenceSensorPin))&&(TMR1 <= pulseWidthThreshold)) { //quit if the line is high for too long
+    TMR0 = 0;
+    while ((digitalPinStatus(waterPresenceSensorPin))&&(TMR0 <= pulseWidthThreshold)) { //quit if the line is high for too long
     };
-    if(TMR1 <= pulseWidthThreshold){
+    if(TMR0 <= pulseWidthThreshold){
         WaterPresent = 1;
     }
     return WaterPresent;
@@ -599,22 +600,22 @@ void main(void) {
 			}
 
             if(deltaAngle > handleMovementThreshold){            // The total movement of the handle from rest has been exceeded
-				  PORTBbits.RB4 = 1;
+				  PORTBbits.RB3 = 1;
             }else{
-                  PORTBbits.RB4 = 0;
+                  PORTBbits.RB3 = 1;
 			} 
-            //PORTBbits.RB4 = 1;
-          
-    }
-        
-                 // Do we have water? 
-    TRISBbits.TRISB3 = 0;
-     if (readWaterSensor()) {
-         PORTBbits.RB4 = 1;
-     }
-     else {
-         PORTBbits.RB4 = 0;
-     }
+            PORTBbits.RB4 = 0;
+            handleMovement++; // SEE WHAT IS GOING ON HERE AHHHHH
+        }
+        PORTBbits.RB4 = 1;
+        // Do we have water? 
+        //TRISBbits.TRISB3 = 0;
+        if (readWaterSensor()) {
+            PORTBbits.RB4 = 1;
+        }
+        else {
+            PORTBbits.RB4 = 1; // Test if pin RB3 works 
+        }
     }
      
 
