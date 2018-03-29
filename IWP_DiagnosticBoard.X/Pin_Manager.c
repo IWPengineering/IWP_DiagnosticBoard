@@ -265,100 +265,100 @@ void pinSampleSelectRegister(int pin) { //  A/D Sample Select Register (CHECK WH
 
 int digitalPinStatus(int pin)
 {
-//	int pinValue;
-//	if (pin == 2)
-//	{
-//		pinValue = PORTAbits.RA0;
-//	}
-//	else if (pin == 3)
-//	{
-//		pinValue = PORTAbits.RA1;
-//	}
-//	else if (pin == 4)
-//	{
-//		pinValue = PORTAbits.RA2;
-//	}
-//	else if (pin == 5)
-//	{
-//		pinValue = PORTBbits.RA3;
-//	}
-//	else if (pin == 6)
-//	{
-//		pinValue = PORTBbits.RA4;
-//	}
-//	else if (pin == 7)
-//	{
-//		pinValue = PORTBbits.RA5;
-//	}
-//	// Pin8 - Always VSS for PIC24FV32KA302 - Do nothing
-//	else if (pin == 9)
-//	{
-//		pinValue = PORTAbits.RA7;
-//	}
-//	else if (pin == 10)
-//	{
-//		pinValue = PORTAbits.RA6;
-//	}
-//	else if (pin == 11)
-//	{
-//		pinValue = PORTBbits.RC0;
-//	}
-//	else if (pin == 12)
-//	{
-//		pinValue = PORTAbits.RC1;
-//	}
-//	else if (pin == 13)
-//	{
-//		pinValue = PORTBbits.RC2;
-//	}
-//	else if (pin == 14)
-//	{
-//		pinValue = PORTBbits.RC3;
-//	}
-//	else if (pin == 15)
-//	{
-//		pinValue = PORTBbits.RC4;
-//	} 
-//	else if (pin == 16)
-//	{
-//		pinValue = PORTBbits.RC5;
-//	}
-//	else if (pin == 17)
-//	{
-//		pinValue = PORTBbits.RC6;
-//	}
-//	else if (pin == 18)
-//	{
-//		pinValue = PORTAbits.RC7;
-//	}
-//	// Pin 19 - Always Vss for PIC18LF26K40 - Do nothing
-//	else if (pin == 21)
-//	{
-//		pinValue = PORTBbits.RB0;
-//	}
-//	else if (pin == 22)
-//	{
-//		pinValue = PORTBbits.RB1;
-//	}
-//	else if (pin == 23)
-//	{
-//		pinValue = PORTBbits.RB2;
-//	}
-//	else if (pin == 24)
-//	{
-//		pinValue = PORTBbits.RB3;
-//	}
-//	else if (pin == 25)
-//	{
-//		pinValue = PORTBbits.RB4;
-//	}
-//	else if (pin == 26)
-//	{
-//		pinValue = PORTBbits.RB5;
-//	}
-//  // Pins 27 and 28 are for the Pickit 
-	//return pinValue;
-    return 1; // CHANGE
+	int pinValue;
+	if (pin == 2)
+	{
+		pinValue = PORTAbits.RA0;
+	}
+	else if (pin == 3)
+	{
+		pinValue = PORTAbits.RA1;
+	}
+	else if (pin == 4)
+	{
+		pinValue = PORTAbits.RA2;
+	}
+	else if (pin == 5)
+	{
+		pinValue = PORTAbits.RA3;
+	}
+	else if (pin == 6)
+	{
+		pinValue = PORTAbits.RA4;
+	}
+	else if (pin == 7)
+	{
+		pinValue = PORTAbits.RA5;
+	}
+	// Pin8 - Always VSS for PIC24FV32KA302 - Do nothing
+	else if (pin == 9)
+	{
+		pinValue = PORTAbits.RA7;
+	}
+	else if (pin == 10)
+	{
+		pinValue = PORTAbits.RA6;
+	}
+	else if (pin == 11)
+	{
+		pinValue = PORTCbits.RC0;
+	}
+	else if (pin == 12)
+	{
+		pinValue = PORTCbits.RC1;
+	}
+	else if (pin == 13)
+	{
+		pinValue = PORTCbits.RC2;
+	}
+	else if (pin == 14)
+	{
+		pinValue = PORTCbits.RC3;
+	}
+	else if (pin == 15)
+	{
+		pinValue = PORTCbits.RC4;
+	} 
+	else if (pin == 16)
+	{
+		pinValue = PORTCbits.RC5;
+	}
+	else if (pin == 17)
+	{
+		pinValue = PORTCbits.RC6;
+	}
+	else if (pin == 18)
+	{
+		pinValue = PORTCbits.RC7;
+	}
+	// Pin 19 - Always Vss for PIC18LF26K40 - Do nothing
+	else if (pin == 21)
+	{
+		pinValue = PORTBbits.RB0;
+	}
+	else if (pin == 22)
+	{
+		pinValue = PORTBbits.RB1;
+	}
+	else if (pin == 23)
+	{
+		pinValue = PORTBbits.RB2;
+	}
+	else if (pin == 24)
+	{
+		pinValue = PORTBbits.RB3;
+	}
+	else if (pin == 25)
+	{
+		pinValue = PORTBbits.RB4;
+	}
+	else if (pin == 26)
+	{
+		pinValue = PORTBbits.RB5;
+	}
+  // Pins 27 and 28 are for the Pickit 
+	return pinValue;
+    //return 1; // CHANGE
 }
 
 
