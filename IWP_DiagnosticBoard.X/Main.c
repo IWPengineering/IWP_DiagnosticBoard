@@ -77,6 +77,7 @@
 #include <math.h>
 #include <string.h>
 #include <p18LF26K40.h>
+#include <pic18.h>
 #include "Pin_Manager.h"
 
 //int __attribute__ ((space(eedata))) eeData; // Global variable located in EEPROM
@@ -385,7 +386,7 @@ int readWaterSensor(void) // RA3 is one water sensor
     TMR0 = 0;
     while ((digitalPinStatus(waterPresenceSensorPin))&&(TMR0 <= pulseWidthThreshold)) { //quit if the line is high for too long
     };
-    int varToSee = digitalPinStatus(waterPresenceSensorPin);
+    int varToSee = digitalPinStatus(waterPresenceSensorPin); // For debugging purposes 
     if(TMR0 <= pulseWidthThreshold){
         WaterPresent = 1;
     }
@@ -603,24 +604,13 @@ void main(void) {
             if(deltaAngle > handleMovementThreshold){            // The total movement of the handle from rest has been exceeded
 				handleMovement = 1;  
                 PORTBbits.RB3 = 1;
-                PORTBbits.RB4 = 0;
+                //PORTBbits.RB4 = 0;
             }else{
                   PORTBbits.RB3 = 0;
                   PORTBbits.RB4 = 0;
-                  handleMovement = 1; 
+                  //handleMovement = 1; 
                   
 			} 
-            //PORTBbits.RB4 = 0;
-            
-            // Check if there is water even when handle not moving?
-//            if (readWaterSensor()) {
-//                PORTBbits.RB4 = 1;
-//            }
-//            else {
-//                PORTBbits.RB4 = 0; 
-//            //handleMovement++; // SEE WHAT IS GOING ON HERE AHHHHH
-//            }
-            
         }
         //PORTBbits.RB4 = 1;
         // Do we have water? 
