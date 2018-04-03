@@ -427,7 +427,7 @@ void initAdc(void) {
     TRISAbits.TRISA4 = 1; //Make this an input
     ANSELAbits.ANSELA4 = 1; //Makes RA4(pin 6) analog  X-axis
     TRISAbits.TRISA5 = 1; //Make this an input
-    ANSELAbits.ANSELA4 = 1;  //Makes RAr(pin 7) analog  Y-axis
+    ANSELAbits.ANSELA5 = 1;  //Makes RAr(pin 7) analog  Y-axis
     
     //Choose reference voltages
     ADREFbits.ADPREF = 0;  //Vref+ = Vdd
@@ -468,9 +468,9 @@ int readAdc(int pin) //check with accelerometer
     
     ADCON0bits.ADON = 1; // Turn on ADC   
     ADCON0bits.ADCONT = 1;   // Enables continuous sampling
-    
-//    while (ADCON0bits.ADGO) { //ADGO = 0 means that conversion is finished
-//    }
+    //ADCON0bits.ADGO = 1;
+    while (!ADCON0bits.ADGO) { //ADGO = 0 means that conversion is finished
+    }
     unsigned int adcValue = ADRES;  //From ADC result register
     return adcValue;
     ADCON0bits.ADON = 0; // Turn off ADC   
