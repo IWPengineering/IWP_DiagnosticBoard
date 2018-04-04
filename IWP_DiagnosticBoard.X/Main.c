@@ -149,8 +149,8 @@ void initialization(void) {
     //DEBUGGING PURPOSES TMR 0
     T0CON1bits.T0CS = 3;
     T0CON0bits.T016BIT = 1;  // 16 bits 
-    T0CON1bits.T0CKPS = 8; //Prescaler 1:256
-    T0CON0bits.T0EN = 1;    // Turns TMR1 ON
+    T0CON1bits.T0CKPS = 8; //Prescaler 1:256, Since Fosc is 4Mhz this means we clock at 15.624khz
+    T0CON0bits.T0EN = 1;    // Turns TMR0 ON
   
     
     // Timer control
@@ -427,7 +427,7 @@ void initAdc(void) {
     TRISAbits.TRISA4 = 1; //Make this an input
     ANSELAbits.ANSELA4 = 1; //Makes RA4(pin 6) analog  X-axis
     TRISAbits.TRISA5 = 1; //Make this an input
-    ANSELAbits.ANSELA5 = 1;  //Makes RAr(pin 7) analog  Y-axis
+    ANSELAbits.ANSELA5 = 1;  //Makes RA5(pin 7) analog  Y-axis
     
     //Choose reference voltages
     ADREFbits.ADPREF = 0;  //Vref+ = Vdd
@@ -435,7 +435,7 @@ void initAdc(void) {
     
     //Choose clock source  (1 conversion = 24us)
     ADCON0bits.ADCS = 0;  //Using internal F_osc 
-    ADCLK = 0;  //ADC Clock frequency = FOSC/(2*(n+1))
+    ADCLK = 3;  //ADC Clock frequency = FOSC/(2*(n+1)) = ADC clock is 500khz (TAD = 2us)
 
     //The interrupt flag is ADIF bit in the PIRx
     
@@ -467,9 +467,9 @@ int readAdc(int pin) //check with accelerometer
     }
     
     ADCON0bits.ADON = 1; // Turn on ADC   
-    ADCON0bits.ADCONT = 1;   // Enables continuous sampling
-    //ADCON0bits.ADGO = 1;
-    while (!ADCON0bits.ADGO) { //ADGO = 0 means that conversion is finished
+    //ADCON0bits.ADCONT = 1;   // Enables continuous sampling
+    ADCON0bits.ADGO = 1;
+    while (ADCON0bits.ADGO) { //ADGO = 0 means that conversion is finished
     }
     unsigned int adcValue = ADRES;  //From ADC result register
     return adcValue;
