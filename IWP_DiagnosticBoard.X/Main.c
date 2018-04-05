@@ -5,7 +5,7 @@
  * Created on November 27, 2017, 3:52 PM
  */
 
-/// PIC18LF26K40 Configuration Bit Settings
+/// PIC18LF27K40 Configuration Bit Settings
 
 // 'C' source line config statements
 
@@ -76,7 +76,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include <string.h>
-#include <p18LF26K40.h>
+#include <p18LF27K40.h>
 #include <pic18.h>
 #include "Pin_Manager.h"
 
@@ -86,8 +86,8 @@
 //            Constants
 // *****************************************************
 
-    const int xAxis = 6; // analog pin connected to x axis of accelerometer ** MAY NEED TO CHANGE
-    const int yAxis = 7; // analog pin connected to y axis of accelerometer ** MAY NEED TO CHANGE
+    const int xAxis = 6; // analog pin connected to x axis of accelerometer
+    const int yAxis = 7; // analog pin connected to y axis of accelerometer
     const int signedNumAdjustADC = 511; // Used to divide the total range of the output of the 10 bit ADC into positive and negative range.
     const int upstrokeInterval = 10; // The number of milliseconds to delay before reading the upstroke
     const float PI = 3.141592;
@@ -116,16 +116,15 @@
 int readAdc(int pin);
 void initAdc(void);
 void initialization(void);
-//void ClearWatchDogTimer(void);
-//void EEProm_Write_Float(unsigned int ee_addr, void *obj_p);
 float getHandleAngle();
-//int EEProm_Read_Int(int addr);
-//void EEProm_Read_Float(int ee_addr, void *obj_p);
 int readWaterSensor(void);
 void delayMs(int ms);
 char BcdToDec(char val);
-//
-//
+//int EEProm_Read_Int(int addr);
+//void EEProm_Read_Float(int ee_addr, void *obj_p);
+//void ClearWatchDogTimer(void);
+//void EEProm_Write_Float(unsigned int ee_addr, void *obj_p);
+
 /*********************************************************************
  * Function: initialization()
  * Input: None
@@ -146,7 +145,7 @@ void initialization(void) {
     ANSELC = 0;
     TRISC = 0xFFFF; 
 
-    //DEBUGGING PURPOSES TMR 0
+    //TMR 0 configurations
     T0CON1bits.T0CS = 3;
     T0CON0bits.T016BIT = 1;  // 16 bits 
     T0CON1bits.T0CKPS = 8; //Prescaler 1:256, Since Fosc is 4Mhz this means we clock at 15.624khz
@@ -167,9 +166,12 @@ void initialization(void) {
     T3CONbits.CKPS = 3; // 1:8 Prescaler 500kHz timer clock
     T3CONbits.ON = 1; // Turns on Timer3
     
-    // UART config
+     initAdc();  //Initialize ADC
+    
+//    UART config
 //    U1MODE = 0x8000;  
-/*    U1MODEbits.BRGH = 0;  // Use the standard BRG speed
+/****    
+    U1MODEbits.BRGH = 0;  // Use the standard BRG speed
     U1BRG = 25;           // set baud to 9600, assumes FCY=4Mhz (FNOSC = FRC)
     U1MODEbits.PDSEL = 0; // 8 bit data, no parity
     U1MODEbits.STSEL = 0; // 1 stop bit
@@ -195,9 +197,7 @@ void initialization(void) {
     pinDirectionIO(17, 1); // Explicitly say TX Control Board is an input 
     //H2O sensor configurations
 //    pinDirectionIO(waterPresenceSensorOnOffPin, 0); //makes water presence sensor pin an output.
-//    digitalPinSet(waterPresenceSensorOnOffPin, 0); //turns off the water presence sensor.
-
-    initAdc();    
+//    digitalPinSet(waterPresenceSensorOnOffPin, 0); //turns off the water presence sensor.  
     
             
     angle2 = getHandleAngle(); // Deduce handle movement 
@@ -209,9 +209,9 @@ void initialization(void) {
     angle8 = getHandleAngle();
     angle9 = getHandleAngle();
     angle10 = getHandleAngle();
- */
+ ****/
     
-    initAdc();   
+    
 }
 
     
@@ -223,7 +223,7 @@ void initialization(void) {
  *           any amount of time, more accurate calculation. 
  * Note: Assumes that TMR1 is clocked by 500khz
  *       
- * TestDate: not tested
+ * TestDate: 4/4/2018
  ********************************************************************/
 void delayMs(int ms) { // Actually using the timer
     int debug = 0;
@@ -527,40 +527,6 @@ void main(void) {
     
     float adcVoltage = getHandleAngle();
     
-    
-//        TRISBbits.TRISB4 = 0;
-//    int counter = 0;
-//    int n = 0;
-//    while(n < 3) {
-//    while(counter < 20000) {                      //Turn on led test
-//        PORTBbits.RB4 = 1;
-//        counter = counter + 1;
-//        //delayMs(4000);                //Added counter instead of using delay which uses the clock. LED is turning on and off.
-//    }
-//    counter = 0;
-//    while(counter < 20000){
-//        PORTBbits.RB4 = 0;
-//        counter = counter + 1;
-//    }
-//    n = n + 1;
-//    }
-//    
-//    PORTBbits.RB4 = 0;
-
-        //delayMs(2000);
-
-//    TRISBbits.TRISB4 = 0;
-//    int counter = 0;
-//    while(counter < 3) {                      //Turn on led test
-//        PORTBbits.RB4 = 1;
-//        delayMs(8000);
-//        PORTBbits.RB4 = 0;
-//        delayMs(4000);
-//        counter = counter + 1;
-//    }
-//    
-//    PORTBbits.RB4 = 0;
-    
  
     //int __attribute__ ((space(eedata))) eeData; // Global variable located in EEPROM
     // Initialize
@@ -571,6 +537,7 @@ void main(void) {
     float angleCurrent = 0; // Stores the current angle of the pump handle
 	float anglePrevious = 0; // Stores the last recorded angle of the pump handle
 	float angleDelta = 0; // Stores the difference between the current and previous angles
+    int readWater = 0; // Was there water? 
     // Noon message section 
     
     // Diagnostic message section 
@@ -580,6 +547,7 @@ void main(void) {
     PORTBbits.RB4 = 0;
     while (1)
 	{   
+
         anglePrevious = getHandleAngle();                            // Get the angle of the pump handle to measure against.  
                                                                      // This is our reference when looking for sufficient movement to say the handle is actually moving.  
                                                                      // the "moving" threshold is defined by handleMovementThreshold in IWPUtilities
@@ -592,8 +560,7 @@ void main(void) {
             if(TimeSinceLastHourCheck > 5000){ // If no one is pumping this works out to be about every minute
                 //hour = BcdToDec(getHourI2C());    //I2C stuff
                 TimeSinceLastHourCheck = 0;
-            }// Set the handle movement to 0 (handle is not moving)
-            int sandy = 1; 
+            }// Set the handle movement to 0 (handle is not moving) 
             delayMs(upstrokeInterval);                            // Delay for a short time
 			float newAngle = getHandleAngle();
 			float deltaAngle = newAngle - anglePrevious;        
@@ -604,219 +571,30 @@ void main(void) {
             if(deltaAngle > handleMovementThreshold){            // The total movement of the handle from rest has been exceeded
 				handleMovement = 1;  
                 PORTBbits.RB3 = 1;
-                //PORTBbits.RB4 = 0;
+                if (readWater == 0) {
+                    PORTBbits.RB4 = 0;
+                }  
             }else{
                   PORTBbits.RB3 = 0;
-                  PORTBbits.RB4 = 0;
+                  if (readWater == 0) {
+                    PORTBbits.RB4 = 0;
+                   }
                   //handleMovement = 1; 
                   
-			} 
+            } 
         }
-        //PORTBbits.RB4 = 1;
+    
         // Do we have water? 
-        //TRISBbits.TRISB3 = 0;
         if (readWaterSensor()) {
+            readWater = 1; 
             PORTBbits.RB4 = 1;
         }
         else {
+            readWater = 0; 
             PORTBbits.RB4 = 0; // Test if pin RB3 works 
         }
     }
-     
-
     
-//    ClearWatchDogTimer(); // Changed from ClearWatchDogTime() which one is correct? )
-//    
-//    int i = 0; 
-//    
-//    if((angleDelta > (-1 * angleThresholdSmall)) && (angleDelta < angleThresholdSmall)){   //Determines if the handle is at rest
-//		i++; //increase i while handle is stationary
-//	}
-//	else {
-//		i = 0;
-//	}
-//    
-//    int leakCondition = 3;  // Assume that we are going to be able to calculate a valid leak rate
-//      
-//    if(!readWaterSensor()){  // If there is already no water when we get here, something strange is happening, don't calculate leak
-//        leakCondition = 4;
-//    }
-//
-//    if(never_primed == 1){
-//        leakCondition = 4;   // there was never any water
-//    }
-//    i = 0;  
-//    
-//    anglePrevious = getHandleAngle(); // Keep track of how many milliseconds have passed
-//    int volumeLoopCounter = 15; // 150 ms                           //number of zero movement cycles before loop ends
-//    long leakDurationCounter = volumeLoopCounter;   // The volume loop has 150 milliseconds of delay 
-//       // if no water or no handle movement before entry.
-//    while (readWaterSensor()){
-//       angleCurrent = getHandleAngle();                   //Get the current angle of the pump handle
-//       angleDelta = angleCurrent - anglePrevious;    //Calculate the change in angle of the pump   handle
-//       anglePrevious = angleCurrent;            // Update the previous angle for the next calculation
-//											                                                                    
-//       // intentional pump and break out of the loop (2 is in radians)
-//       // If the handle starts moving we will abandon calculating a new leak rate
-//       //  Moving is the same criterion as stopping in volume calculation loop
-//       if ((angleDelta > (-1 * angleThresholdSmall)) && (angleDelta < angleThresholdSmall)){    
-//        //Determines if the handle is at rest
-//            i=0; //Handle Not moving
-//       }
-//       else{
-//            i++; //Handle Moving
-//       }             
-//
-//       if (i >= volumeLoopCounter){ //Has the handle been moving for 150ms?
-//            leakCondition = 1;
-//            break;
-//       }
-//
-//      if (leakDurationCounter >= leakRateTimeOut){                              // (was 100 - 10/8/2015 KK)
-//            leakCondition = 2; //Jump to condition for no leak if while is broken out of on condition of
-//           //exceeding the leakRateTimeOut wait.
-//            break;
-//      }
-//      delayMs(upstrokeInterval);
-//      leakDurationCounter++;
-//    }
-//     
-//    digitalPinSet(waterPresenceSensorOnOffPin, 0); //turns off the water presence sensor.
-//        
-//        
-//    if (upStrokeExtract < 900){  // If someone has not pumped at least 10 liters we don't want to measure leak rate
-//
-//    // this is to prevent a splash from a slug of water hitting the WPS and being interpreted as leak
-//    // when it is just receding back down the pipe when momentum goes away.
-//    //  upStrokeExtractis in degrees at this point
-//       leakCondition = 5;
-//    }
-//
-//    switch (leakCondition){
-//        case 1:
-//            leakRate = leakRatePrevious; // They started pumping again so can't calculate a new leak rate, use the last one when calculating volume pumped
-//            break;
-//        case 2:                          // Waited the max time and water was still there so leak rate = 0
-//            leakRate = 0;
-//            leakRatePrevious = leakRate;  
-//            break;
-//        case 3:                         // The pump did prime but water leaked out in less than our max time to wait.  So calculate a new value
-//            leakRate = leakSensorVolume / ((leakDurationCounter * upstrokeInterval) / 1000.0); // liters/sec
-//            leakRatePrevious = leakRate;    
-//            break;           
-//		
-//        case 4:
-//            leakRate = leakRatePrevious;  // there was no water at the start of this so we can't calculate a new leak
-////            leakRate = 0;  // there was never any water so we can't calculate a new leak rate, let previous value stay the previous value
-//            break;
-//        
-//        case 5:
-//            leakRate = leakRatePrevious; // They started pumping again so can't calculate a new leak rate, use the last one when calculating volume pumped
-//            break;
-//      }
-//       if ((leakRate * 3600) > leakRateLong) {
-//            leakRateLong = leakRate * 3600;                                              //reports in L/hr
-//            EEProm_Write_Float(0,&leakRateLong);                                        // Save to EEProm
-//       }
-//
-///******************************************* Prime time calc******************************/
-//    int i = 0; 
-//    timeOutStatus = 0;                               // prepares timeoutstatus for new event
-//    anglePrevious = getHandleAngle();    // Get the angle of the pump handle to measure against
-//    upStrokePrime = 0;
-//    never_primed = 0;
-//    hour = BcdToDec(getHourI2C()); //Update the time so we know where to save this pumping event
-//    timeSinceLastHourCheck = 0;
-//
-//    digitalPinSet(waterPresenceSensorOnOffPin, 1); //turns on the water presence sensor.
-//    while ((timeOutStatus < waterPrimeTimeOut) && !readWaterSensor()) {
-//        angleCurrent = getHandleAngle();                      //gets the latest 10-average angle
-//        angleDelta = angleCurrent - anglePrevious;            //determines the amount of handle movement from last reading
-//        anglePrevious = angleCurrent;        //Prepares anglePrevious for the next loop
-//        if(angleDelta > 0){                                   //Determines direction of handle movement
-//            upStrokePrime += angleDelta;    //If the valve is moving upward, the movement is added to an
-//                           //accumlation var (even if it was smaller than angleThresholdSmall)
-//        }
-//                // If they have stopped, pumping we should give up too
-//        if((angleDelta > (-1 * angleThresholdSmall)) && (angleDelta < angleThresholdSmall)){   //Determines if the handle is at rest
-//                    i++; // we want to stop if the user stops pumping              
-//        }
-//        else{
-//                    i=0;   // they are still trying
-//        } 
-//        
-//        if(i == 100) {  // They quit trying for at least 1 second
-//            never_primed = 1;
-//            break;
-//        }
-//        
-//        timeOutStatus++; // we will wait for up to waterPrimeTimeOut of pumping
-//        delayMs(upstrokeInterval); 
-//    }
-//    
-//    if(timeOutStatus >= waterPrimeTimeOut){
-//        never_primed = 1;          
-//    }
-//    
-//    upStrokePrimeMeters = upStrokePrime * upstrokeToMeters;	      // Convert to meters
-//    if (upStrokePrimeMeters > longestPrime){                      // Updates the longestPrime
-//        longestPrime = upStrokePrimeMeters;
-//        EEProm_Write_Float(1,&longestPrime);                      // Save to EEProm
-//    }
-//
-///********************Vol calc************/
-//    volumeEvent = (MKII * upStrokeExtract);     //[L/rad][rad]=[L] 
-//        
-//    volumeEvent -= (leakRate * ((extractionDurationCounter * upstrokeInterval) / 1000.0)); //[L/s][s]=[L]
-//    if(volumeEvent < 0) {
-//        volumeEvent = 0; // we can't pump negative volume
-//    }
-//
-//       
-//    switch (hour / 2) {
-//		case 0:
-//			volume02 = volume02 + volumeEvent;
-//  			break;
-//		case 1:
-//			volume24 = volume24 + volumeEvent;
-//			break;
-//		case 2:
-//			volume46 = volume46 + volumeEvent;
-//			break;
-//		case 3:
-//			volume68 = volume68 + volumeEvent;
-//			break;
-//		case 4:
-//			volume810 = volume810 + volumeEvent;
-//			break;
-//		case 5:
-//			volume1012 = volume1012 + volumeEvent;
-//			break;
-//		case 6:
-//			volume1214 = volume1214 + volumeEvent;
-//			break;
-//		case 7:
-//			volume1416 = volume1416 + volumeEvent;
-//			break;
-//		case 8:
-//			volume1618 = volume1618 + volumeEvent;
-//			break;
-//		case 9:
-//			volume1820 = volume1820 + volumeEvent;
-//			break;
-//		case 10:
-//			volume2022 = volume2022 + volumeEvent;
-//			break;
-//		case 11:
-//			volume2224 = volume2224 + volumeEvent;
-//			break;
-//	}
-//
-//
-//// Is it time to record volume from previous time bin to EEProm?
-//    if(hour/2 != active_volume_bin){
-//        SaveVolumeToEEProm();
-//    }             
     return;
 }
 
