@@ -1,65 +1,5 @@
 
-# 1 "Main.c"
-
-
-# 13
-#pragma config FEXTOSC = OFF
-#pragma config RSTOSC = HFINTOSC_1MHZ
-
-
-#pragma config CLKOUTEN = OFF
-#pragma config CSWEN = ON
-#pragma config FCMEN = ON
-
-
-#pragma config MCLRE = EXTMCLR
-#pragma config PWRTE = OFF
-#pragma config LPBOREN = OFF
-#pragma config BOREN = SBORDIS
-
-
-
-#pragma config ZCD = OFF
-#pragma config PPS1WAY = ON
-#pragma config STVREN = ON
-#pragma config DEBUG = OFF
-#pragma config XINST = OFF
-
-
-#pragma config WDTCPS = WDTCPS_31
-#pragma config WDTE = OFF
-
-
-#pragma config WDTCWS = WDTCWS_7
-#pragma config WDTCCS = SC
-
-
-#pragma config WRT0 = OFF
-#pragma config WRT1 = OFF
-#pragma config WRT2 = OFF
-#pragma config WRT3 = OFF
-
-
-#pragma config WRTC = OFF
-#pragma config WRTB = OFF
-#pragma config WRTD = OFF
-#pragma config SCANE = ON
-#pragma config LVP = ON
-
-
-#pragma config CP = OFF
-#pragma config CPD = OFF
-
-
-
-
-#pragma config EBTR0 = OFF
-#pragma config EBTR1 = OFF
-#pragma config EBTR2 = OFF
-#pragma config EBTR3 = OFF
-
-
-#pragma config EBTRB = OFF
+# 1 "Pin_Manager.c"
 
 # 26 "C:\Program Files (x86)\Microchip\xc8\v1.44\include\htc.h"
 extern const char __xc8_OPTIM_SPEED;
@@ -13546,198 +13486,6 @@ extern __nonreentrant void _delaywdt(unsigned long);
 #pragma intrinsic(_delay3)
 extern __nonreentrant void _delay3(unsigned char);
 
-# 4 "C:\Program Files (x86)\Microchip\xc8\v1.44\include\__size_t.h"
-typedef unsigned size_t;
-
-# 7 "C:\Program Files (x86)\Microchip\xc8\v1.44\include\stdarg.h"
-typedef void * va_list[1];
-
-#pragma intrinsic(__va_start)
-extern void * __va_start(void);
-
-#pragma intrinsic(__va_arg)
-extern void * __va_arg(void *, ...);
-
-# 43 "C:\Program Files (x86)\Microchip\xc8\v1.44\include\stdio.h"
-struct __prbuf
-{
-char * ptr;
-void (* func)(char);
-};
-
-# 29 "C:\Program Files (x86)\Microchip\xc8\v1.44\include\errno.h"
-extern int errno;
-
-# 12 "C:\Program Files (x86)\Microchip\xc8\v1.44\include\conio.h"
-extern void init_uart(void);
-
-extern char getch(void);
-extern char getche(void);
-extern void putch(char);
-extern void ungetch(char);
-
-extern __bit kbhit(void);
-
-# 23
-extern char * cgets(char *);
-extern void cputs(const char *);
-
-# 88 "C:\Program Files (x86)\Microchip\xc8\v1.44\include\stdio.h"
-extern int cprintf(char *, ...);
-#pragma printf_check(cprintf)
-
-
-
-extern int _doprnt(struct __prbuf *, const register char *, register va_list);
-
-
-# 180
-#pragma printf_check(vprintf) const
-#pragma printf_check(vsprintf) const
-
-extern char * gets(char *);
-extern int puts(const char *);
-extern int scanf(const char *, ...) __attribute__((unsupported("scanf() is not supported by this compiler")));
-extern int sscanf(const char *, const char *, ...) __attribute__((unsupported("sscanf() is not supported by this compiler")));
-extern int vprintf(const char *, va_list) __attribute__((unsupported("vprintf() is not supported by this compiler")));
-extern int vsprintf(char *, const char *, va_list) __attribute__((unsupported("vsprintf() is not supported by this compiler")));
-extern int vscanf(const char *, va_list ap) __attribute__((unsupported("vscanf() is not supported by this compiler")));
-extern int vsscanf(const char *, const char *, va_list) __attribute__((unsupported("vsscanf() is not supported by this compiler")));
-
-#pragma printf_check(printf) const
-#pragma printf_check(sprintf) const
-extern int sprintf(char *, const char *, ...);
-extern int printf(const char *, ...);
-
-# 7 "C:\Program Files (x86)\Microchip\xc8\v1.44\include\stdlib.h"
-typedef unsigned short wchar_t;
-
-# 15
-typedef struct {
-int rem;
-int quot;
-} div_t;
-typedef struct {
-unsigned rem;
-unsigned quot;
-} udiv_t;
-typedef struct {
-long quot;
-long rem;
-} ldiv_t;
-typedef struct {
-unsigned long quot;
-unsigned long rem;
-} uldiv_t;
-
-# 53
-extern double atof(const char *);
-extern double strtod(const char *, const char **);
-extern int atoi(const char *);
-extern unsigned xtoi(const char *);
-extern long atol(const char *);
-extern long strtol(const char *, char **, int);
-
-extern int rand(void);
-extern void srand(unsigned int);
-extern void * calloc(size_t, size_t);
-extern div_t div(int numer, int denom);
-extern udiv_t udiv(unsigned numer, unsigned denom);
-extern ldiv_t ldiv(long numer, long denom);
-extern uldiv_t uldiv(unsigned long numer,unsigned long denom);
-extern unsigned long _lrotl(unsigned long value, unsigned int shift);
-extern unsigned long _lrotr(unsigned long value, unsigned int shift);
-extern unsigned int _rotl(unsigned int value, unsigned int shift);
-extern unsigned int _rotr(unsigned int value, unsigned int shift);
-
-
-
-
-extern void * malloc(size_t);
-extern void free(void *);
-extern void * realloc(void *, size_t);
-
-# 86
-extern int atexit(void (*)(void));
-extern char * getenv(const char *);
-extern char ** environ;
-extern int system(char *);
-extern void qsort(void *, size_t, size_t, int (*)(const void *, const void *));
-extern void * bsearch(const void *, void *, size_t, size_t, int(*)(const void *, const void *));
-extern int abs(int);
-extern long labs(long);
-
-extern char * itoa(char * buf, int val, int base);
-extern char * utoa(char * buf, unsigned val, int base);
-
-
-
-
-extern char * ltoa(char * buf, long val, int base);
-extern char * ultoa(char * buf, unsigned long val, int base);
-
-extern char * ftoa(float f, int * status);
-
-# 30 "C:\Program Files (x86)\Microchip\xc8\v1.44\include\math.h"
-extern double fabs(double);
-extern double floor(double);
-extern double ceil(double);
-extern double modf(double, double *);
-extern double sqrt(double);
-extern double atof(const char *);
-extern double sin(double) ;
-extern double cos(double) ;
-extern double tan(double) ;
-extern double asin(double) ;
-extern double acos(double) ;
-extern double atan(double);
-extern double atan2(double, double) ;
-extern double log(double);
-extern double log10(double);
-extern double pow(double, double) ;
-extern double exp(double) ;
-extern double sinh(double) ;
-extern double cosh(double) ;
-extern double tanh(double);
-extern double eval_poly(double, const double *, int);
-extern double frexp(double, int *);
-extern double ldexp(double, int);
-extern double fmod(double, double);
-extern double trunc(double);
-extern double round(double);
-
-# 14 "C:\Program Files (x86)\Microchip\xc8\v1.44\include\string.h"
-extern void * memcpy(void *, const void *, size_t);
-extern void * memmove(void *, const void *, size_t);
-extern void * memset(void *, int, size_t);
-
-# 36
-extern char * strcat(char *, const char *);
-extern char * strcpy(char *, const char *);
-extern char * strncat(char *, const char *, size_t);
-extern char * strncpy(char *, const char *, size_t);
-extern char * strdup(const char *);
-extern char * strtok(char *, const char *);
-
-
-extern int memcmp(const void *, const void *, size_t);
-extern int strcmp(const char *, const char *);
-extern int stricmp(const char *, const char *);
-extern int strncmp(const char *, const char *, size_t);
-extern int strnicmp(const char *, const char *, size_t);
-extern void * memchr(const void *, int, size_t);
-extern size_t strcspn(const char *, const char *);
-extern char * strpbrk(const char *, const char *);
-extern size_t strspn(const char *, const char *);
-extern char * strstr(const char *, const char *);
-extern char * stristr(const char *, const char *);
-extern char * strerror(int);
-extern size_t strlen(const char *);
-extern char * strchr(const char *, int);
-extern char * strichr(const char *, int);
-extern char * strrchr(const char *, int);
-extern char * strrichr(const char *, int);
-
 # 12 "Pin_Manager.h"
 void digitalPinSet(int pin, int io);
 void specifyAnalogPin(int pin, int analogOrDigital);
@@ -13745,338 +13493,126 @@ int digitalPinStatus(int pin);
 void pinDirectionIO(int pin, int io);
 void pinSampleSelectRegister(int pin);
 
-# 89 "Main.c"
-const int xAxis = 6;
-const int yAxis = 7;
-const int signedNumAdjustADC = 511;
-const int upstrokeInterval = 10;
-const float PI = 3.141592;
-const float angleThresholdSmall = 0.1;
-const float handleMovementThreshold = 5.0;
-float angle1 = 0;
-float angle2 = 0;
-float angle3 = 0;
-float angle4 = 0;
-float angle5 = 0;
-float angle6 = 0;
-float angle7 = 0;
-float angle8 = 0;
-float angle9 = 0;
-float angle10 = 0;
-const int pulseWidthThreshold = 20;
+# 18 "Pin_Manager.c"
+void pinDirectionIO(int pin, int io) {
 
-
-
-
-int waterPresenceSensorPin = 5;
-
-
-
-
-int readAdc(int pin);
-void initAdc(void);
-void initialization(void);
-float getHandleAngle();
-int readWaterSensor(void);
-void delayMs(int ms);
-char BcdToDec(char val);
-void initSPI(void);
-void writeSPI(char);
-
-# 139
-void initialization(void) {
-
-
-
-ANSELA = 0;
-TRISA = 0xFFFF;
-ANSELB = 0;
-TRISB = 0xFFFF;
-ANSELC = 0;
-TRISC = 0xFFFF;
-
-
-T0CON1bits.T0CS = 3;
-T0CON0bits.T016BIT = 1;
-T0CON1bits.T0CKPS = 8;
-T0CON0bits.T0EN = 1;
-
-
-
-
-TMR1CLKbits.CS = 3;
-T1CONbits.CKPS = 3;
-T1CONbits.RD16 = 1;
-T1CONbits.ON = 1;
-T1GCONbits.GE = 0;
-
-
-TMR3CLKbits.CS = 3;
-T3CONbits.RD16 = 1;
-T3CONbits.CKPS = 3;
-T3CONbits.ON = 1;
-
-initAdc();
-initSPI();
-
-# 218
+# 96
 }
 
-# 228
-void initSPI(void){
-TRISCbits.TRISC4 = 0;
-TRISCbits.TRISC5 = 0;
-
-SSP1CON1bits.SSPEN = 1;
-SSP1CON1bits.CKP = 0;
-SSP1CON1bits.SSPM = 0;
-SSP1CON3bits.BOEN = 0;
-SSP1DATPPS = 20;
-RC3PPS = 16;
-RC5PPS = 15;
-PORTCbits.RC0 = 0;
-
-
-}
-
-# 251
-void writeSPI(char output_data){
-while(SSP1STATbits.BF==1){ }
-SSP1CON1bits.WCOL = 0;
-SSP1BUF = output_data;
-}
-
-# 267
-void delayMs(int ms) {
-int debug = 0;
-int end_count;
-
-while(ms > 4000) {
-TMR0 = 0;
-while(TMR0 < 62500) {
-ms = ms - 4000;
-}
-}
-
-end_count = ms * 15.625;
-TMR0 = 0;
-while(TMR0<end_count){
-debug = TMR0;
-}
-
-# 300
-}
-
-# 409
-int readWaterSensor(void)
-{
-int WaterPresent = 0;
-
-delayMs(5);
-
-TMR0 = 0;
-if (digitalPinStatus(waterPresenceSensorPin) == 1) {
-while ((digitalPinStatus(waterPresenceSensorPin))&&(TMR0 <= pulseWidthThreshold)) {
-};
-}
-
-TMR0 = 0;
-while ((digitalPinStatus(waterPresenceSensorPin) == 0)&&(TMR0 <= pulseWidthThreshold)) {
-};
-
-TMR0 = 0;
-while ((digitalPinStatus(waterPresenceSensorPin))&&(TMR0 <= pulseWidthThreshold)) {
-};
-int varToSee = digitalPinStatus(waterPresenceSensorPin);
-if(TMR0 <= pulseWidthThreshold){
-WaterPresent = 1;
-}
-return WaterPresent;
-}
-
-# 439
-char BcdToDec(char val) {
-return ((val / 16 * 10) + (val % 16));
-}
-
-
-int depthSensorPin = 2;
-int Pin4 = 4;
-int rxPin = 6;
-int xAxisAccelerometerPin = 24;
-int yAxisAccelerometerPin = 23;
-int batteryLevelPin = 11;
-int TimeSinceLastHourCheck = 0;
-int hour = 0;
-
-# 462
-void initAdc(void) {
-
-ADCON0bits.ADON = 0;
-
-TRISAbits.TRISA4 = 1;
-ANSELAbits.ANSELA4 = 1;
-TRISAbits.TRISA5 = 1;
-ANSELAbits.ANSELA5 = 1;
-
-
-ADREFbits.ADPREF = 0;
-ADREFbits.ADNREF = 0;
-
-
-ADCON0bits.ADCS = 0;
-ADCLK = 3;
-
-
-
-
-ADCON0bits.ADFM = 1;
-
-}
-
-
-int readAdc(int pin)
-{
-switch (pin) {
-
-case 6:
-ADPCHbits.ADPCH = 4;
-
-
-
-
-break;
-case 7:
-ADPCHbits.ADPCH = 5;
-
-
-
-
-break;
-
-}
-
-ADCON0bits.ADON = 1;
-
-ADCON0bits.ADGO = 1;
-while (ADCON0bits.ADGO) {
-}
-unsigned int adcValue = ADRES;
-return adcValue;
-ADCON0bits.ADON = 0;
-}
-
-# 533
-float getHandleAngle() {
-
-signed int xValue = readAdc(xAxis) - signedNumAdjustADC;
-signed int yValue = readAdc(yAxis) - signedNumAdjustADC;
-float angle = atan2(yValue, xValue) * (180 / PI);
-
-if (angle > 20) {
-angle = 20.0;
-} else if (angle < -30) {
-angle = -30.0;
-}
-angle10 = angle9;
-angle9 = angle8;
-angle8 = angle7;
-angle7 = angle6;
-angle6 = angle5;
-angle5 = angle4;
-angle4 = angle3;
-angle3 = angle2;
-angle2 = angle1;
-angle1 = angle;
-
-float averageAngle = (angle1 + angle2 + angle3 + angle4 + angle5 + angle6 + angle7 + angle8 + angle9 + angle10) / 10.0;
-
-return averageAngle;
-}
-
-void ClearWatchDogTimer(void){
-asm(" clrwdt");
-}
-
-void main(void) {
-initialization();
-
-
-char EEPROMdata = 0;
-EEPROMdata = 0xAA;
-writeSPI(EEPROMdata);
-EEPROMdata = 7;
-writeSPI(EEPROMdata);
-
-
-
-float adcVoltage = getHandleAngle();
-
-
-
-
-TRISBbits.TRISB3 = 0;
-TRISBbits.TRISB4 = 0;
-
-int handleMovement = 0;
-float angleCurrent = 0;
-float anglePrevious = 0;
-float angleDelta = 0;
-int readWater = 0;
-
-# 594
-PORTBbits.RB3 = 0;
-PORTBbits.RB4 = 0;
-while (1)
+void digitalPinSet(int pin, int set)
 {
 
-anglePrevious = getHandleAngle();
+# 177
+}
 
 
-
-handleMovement = 0;
-while (handleMovement == 0)
+void specifyAnalogPin(int pin, int analogOrDigital)
 {
-ClearWatchDogTimer();
-TimeSinceLastHourCheck++;
-if(TimeSinceLastHourCheck > 5000){
 
-TimeSinceLastHourCheck = 0;
-}
-delayMs(upstrokeInterval);
-float newAngle = getHandleAngle();
-float deltaAngle = newAngle - anglePrevious;
-if(deltaAngle < 0) {
-deltaAngle *= -1;
-}
-
-if(deltaAngle > handleMovementThreshold){
-handleMovement = 1;
-PORTBbits.RB3 = 1;
-if (readWater == 0) {
-PORTBbits.RB4 = 0;
-}
-}else{
-PORTBbits.RB3 = 0;
-if (readWater == 0) {
-PORTBbits.RB4 = 0;
+# 248
 }
 
 
-}
+void pinSampleSelectRegister(int pin) {
+
+# 264
 }
 
+int digitalPinStatus(int pin)
+{
+int pinValue;
+if (pin == 2)
+{
+pinValue = PORTAbits.RA0;
+}
+else if (pin == 3)
+{
+pinValue = PORTAbits.RA1;
+}
+else if (pin == 4)
+{
+pinValue = PORTAbits.RA2;
+}
+else if (pin == 5)
+{
+pinValue = PORTAbits.RA3;
+}
+else if (pin == 6)
+{
+pinValue = PORTAbits.RA4;
+}
+else if (pin == 7)
+{
+pinValue = PORTAbits.RA5;
+}
 
-if (readWaterSensor()) {
-readWater = 1;
-PORTBbits.RB4 = 1;
+else if (pin == 9)
+{
+pinValue = PORTAbits.RA7;
 }
-else {
-readWater = 0;
-PORTBbits.RB4 = 0;
+else if (pin == 10)
+{
+pinValue = PORTAbits.RA6;
 }
+else if (pin == 11)
+{
+pinValue = PORTCbits.RC0;
+}
+else if (pin == 12)
+{
+pinValue = PORTCbits.RC1;
+}
+else if (pin == 13)
+{
+pinValue = PORTCbits.RC2;
+}
+else if (pin == 14)
+{
+pinValue = PORTCbits.RC3;
+}
+else if (pin == 15)
+{
+pinValue = PORTCbits.RC4;
+}
+else if (pin == 16)
+{
+pinValue = PORTCbits.RC5;
+}
+else if (pin == 17)
+{
+pinValue = PORTCbits.RC6;
+}
+else if (pin == 18)
+{
+pinValue = PORTCbits.RC7;
 }
 
-return;
+else if (pin == 21)
+{
+pinValue = PORTBbits.RB0;
+}
+else if (pin == 22)
+{
+pinValue = PORTBbits.RB1;
+}
+else if (pin == 23)
+{
+pinValue = PORTBbits.RB2;
+}
+else if (pin == 24)
+{
+pinValue = PORTBbits.RB3;
+}
+else if (pin == 25)
+{
+pinValue = PORTBbits.RB4;
+}
+else if (pin == 26)
+{
+pinValue = PORTBbits.RB5;
+}
+
+return pinValue;
+
 }
 
