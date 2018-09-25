@@ -76,7 +76,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include <string.h>
-#include <p18LF26K40.h>
+#include <pic18LF27K40.h>
 #include <pic18.h>
 #include "Pin_Manager.h"
 
@@ -226,16 +226,16 @@ void initialization(void) {
  * TestDate: not tested
  ********************************************************************/
 void initSPI(void){
-    TRISCbits.TRISC4 = 0; // make SO an output
-    TRISCbits.TRISC5 = 0; // make SCLK an output
+    TRISCbits.TRISC5 = 0; // make Master Data Out an output (Slave in))
+    TRISCbits.TRISC3 = 0; // make SCLK an output
     //SSP1STAT = default values 
     SSP1CON1bits.SSPEN = 1;  // Enable SPI
     SSP1CON1bits.CKP = 0; //Clock idle is low
     SSP1CON1bits.SSPM = 0; //SCLK = Fosc/4;
     SSP1CON3bits.BOEN = 0; //Don't overwrite the data buffer with new stuff if its not been read yet
-    SSP1DATPPS = 20; // This is Data input to C4
-    RC3PPS = 16; // This is data output to C3
-    RC5PPS = 15; // This is data clock to C5
+    SSP1DATPPS = 20; // This is Master Data input to C4
+    RC3PPS = 15; // This is data clock to C3
+    RC5PPS = 16; // This is data output to C5
     PORTCbits.RC0 = 0; 
     
     
@@ -249,7 +249,7 @@ void initSPI(void){
  * TestDate: not tested
  ********************************************************************/
 void writeSPI(char output_data){
-    while(SSP1STATbits.BF==1){   } // we could get stuck here
+    //while(SSP1STATbits.BF==1){   } // we could get stuck here
     SSP1CON1bits.WCOL = 0; //Clear collision bit in case there was a previous problem
     SSP1BUF = output_data;  // load the output buffer     
 }
@@ -566,10 +566,27 @@ void main(void) {
     
     // This is just to Debug the SPI Communication with the EEPROM
     char EEPROMdata = 0;
-    EEPROMdata = 0xAA;
-    writeSPI(EEPROMdata);
-    EEPROMdata = 7;
-    writeSPI(EEPROMdata);   
+    
+    TRISBbits.TRISB3 = 0;
+    TRISBbits.TRISB4 = 0;
+    
+    while(1){
+        EEPROMdata = 0xAA;   //1010 1010
+        writeSPI(EEPROMdata);
+        EEPROMdata = 0xf;    //0000 1111
+        writeSPI(EEPROMdata);
+        EEPROMdata = 0x70;   //0111 0000
+        writeSPI(EEPROMdata);
+        
+//        if (PORTBbits.RB3) {
+//            PORTBbits.RB3 = 0;
+//            delayMs(1000);
+//        }else{
+//            PORTBbits.RB3 = 1;
+//            delayMs(1000);
+//        }
+        
+    }
     
     // This is just to Debug the SPI Communication with the EEPROM
     
