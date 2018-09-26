@@ -121,7 +121,7 @@ int readWaterSensor(void);
 void delayMs(int ms);
 char BcdToDec(char val);
 void initSPI(void);
-void writeSPI(char);
+void writeSPI(char, long);
 //int EEProm_Read_Int(int addr);
 //void EEProm_Read_Float(int ee_addr, void *obj_p);
 //void ClearWatchDogTimer(void);
@@ -228,6 +228,7 @@ void initialization(void) {
 void initSPI(void){
     TRISCbits.TRISC5 = 0; // make Master Data Out an output (Slave in))
     TRISCbits.TRISC3 = 0; // make SCLK an output
+    TRISCbits.TRISC0 = 0; // make CS output
     //SSP1STAT = default values 
     SSP1CON1bits.SSPEN = 1;  // Enable SPI
     SSP1CON1bits.CKP = 0; //Clock idle is low
@@ -236,7 +237,13 @@ void initSPI(void){
     SSP1DATPPS = 20; // This is Master Data input to C4
     RC3PPS = 15; // This is data clock to C3
     RC5PPS = 16; // This is data output to C5
+    
+    PORTCbits.RC0 = 1; 
     PORTCbits.RC0 = 0; 
+    SSP1BUF = 6;  // send Write enable command
+    PORTCbits.RC0 = 1; 
+    
+    
     
     
 }
@@ -248,10 +255,25 @@ void initSPI(void){
  * Note: Pic Dependent
  * TestDate: not tested
  ********************************************************************/
-void writeSPI(char output_data){
+void writeSPI(char output_data, long address){
     //while(SSP1STATbits.BF==1){   } // we could get stuck here
     SSP1CON1bits.WCOL = 0; //Clear collision bit in case there was a previous problem
-    SSP1BUF = output_data;  // load the output buffer     
+    PORTCbits.RC0 = 0; 
+    SSP1BUF = 5;  //send read status register command
+    while (SSP1BUF || 1 == 1) {  }
+    PORTCbits.RC0 = 1; 
+    PORTCbits.RC0 = 0; 
+    SSP1BUF = 2;  //send write command
+    
+    //send the address
+    SSP1BUF = 0;
+    SSP1BUF = 0;
+    SSP1BUF = 0;
+    SSP1BUF = 0;
+    
+    SSP1BUF = output_data;
+    PORTCbits.RC0 = 1; 
+    
 }
     
 /*********************************************************************
@@ -572,11 +594,11 @@ void main(void) {
     
     while(1){
         EEPROMdata = 0xAA;   //1010 1010
-        writeSPI(EEPROMdata);
+        writeSPI(EEPROMdata, 0);
         EEPROMdata = 0xf;    //0000 1111
-        writeSPI(EEPROMdata);
+        writeSPI(EEPROMdata, 0);
         EEPROMdata = 0x70;   //0111 0000
-        writeSPI(EEPROMdata);
+        writeSPI(EEPROMdata, 0);
         
 //        if (PORTBbits.RB3) {
 //            PORTBbits.RB3 = 0;
