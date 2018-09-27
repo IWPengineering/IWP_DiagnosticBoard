@@ -232,16 +232,23 @@ void initSPI(void){
     //SSP1STAT = default values 
     SSP1CON1bits.SSPEN = 1;  // Enable SPI
     SSP1CON1bits.CKP = 0; //Clock idle is low
+    SSP1STATbits.CKE = 1; //Clock select bit is high
     SSP1CON1bits.SSPM = 0; //SCLK = Fosc/4;
     SSP1CON3bits.BOEN = 0; //Don't overwrite the data buffer with new stuff if its not been read yet
     SSP1DATPPS = 20; // This is Master Data input to C4
     RC3PPS = 15; // This is data clock to C3
     RC5PPS = 16; // This is data output to C5
     
+    char readData;
+    while(1) {
     PORTCbits.RC0 = 1; 
+    SSP1CON1bits.WCOL = 0; //Clear collision bit in case there was a previous problem
+    readData = SSP1BUF;
     PORTCbits.RC0 = 0; 
-    SSP1BUF = 6;  // send Write enable command
+    SSP1BUF = 0xaa;  // send Write enable command
+    //while(!((readData = SSP1STAT)||1) ){ }
     PORTCbits.RC0 = 1; 
+    }
     
     
     
