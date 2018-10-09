@@ -230,7 +230,7 @@ void initSPI(void){
     TRISCbits.TRISC3 = 0; // make SCLK an output
     TRISCbits.TRISC0 = 0; // make CS output
     //SSP1STAT = default values 
-    SSP1CON1bits.SSPEN = 1;  // Enable SPI
+    
     SSP1CON1bits.CKP = 0; //Clock idle is low
     SSP1STATbits.CKE = 1; //Clock select bit is high
     SSP1CON1bits.SSPM = 0; //SCLK = Fosc/4;
@@ -238,17 +238,8 @@ void initSPI(void){
     SSP1DATPPS = 20; // This is Master Data input to C4
     RC3PPS = 15; // This is data clock to C3
     RC5PPS = 16; // This is data output to C5
-    
-    char readData;
-    while(1) {
-    PORTCbits.RC0 = 1; 
-    SSP1CON1bits.WCOL = 0; //Clear collision bit in case there was a previous problem
-    readData = SSP1BUF;
-    PORTCbits.RC0 = 0; 
-    SSP1BUF = 0xaa;  // send Write enable command
-    //while(!((readData = SSP1STAT)||1) ){ }
-    PORTCbits.RC0 = 1; 
-    }
+    SSP1CON1bits.SSPEN = 1;  // Enable SPI
+    PORTCbits.RC0 = 1;
     
     
     
@@ -263,24 +254,65 @@ void initSPI(void){
  * TestDate: not tested
  ********************************************************************/
 void writeSPI(char output_data, long address){
-    //while(SSP1STATbits.BF==1){   } // we could get stuck here
+    //while(SSP1STATbits.BF == 0){   } // we could get stuck here
+    char local_data = 0;
+    PORTCbits.RC0 = 1; 
     SSP1CON1bits.WCOL = 0; //Clear collision bit in case there was a previous problem
     PORTCbits.RC0 = 0; 
-    SSP1BUF = 5;  //send read status register command
-    while (SSP1BUF || 1 == 1) {  }
-    PORTCbits.RC0 = 1; 
+    SSP1BUF = 6;  // send Write enable command
+    while(SSP1STATbits.BF == 0){  } //wait for the command to be sent
+    PORTCbits.RC0 = 1;
+    local_data = SSP1BUF;
+    
     PORTCbits.RC0 = 0; 
-    SSP1BUF = 2;  //send write command
+    SSP1BUF = 5;  // read status register command
+    while(SSP1STATbits.BF == 0){  } //wait for the command to be sent
+    local_data = SSP1BUF;
+    SSP1BUF = 0;  // garbage
+    while(SSP1STATbits.BF == 0){  } //wait for the command to be sent
+    local_data = SSP1BUF;
+    SSP1BUF = 0;  // read status register command
+    while(SSP1STATbits.BF == 0){  } //wait for the command to be sent
+    local_data = SSP1BUF;
+    SSP1BUF = 0;  // read status register command
+    while(SSP1STATbits.BF == 0){  } //wait for the command to be sent
+    local_data = SSP1BUF;
+    SSP1BUF = 0;  // garbage
+    while(SSP1STATbits.BF == 0){  } //wait for the command to be sent
+    local_data = SSP1BUF;
+    SSP1BUF = 0;  // read status register command
+    while(SSP1STATbits.BF == 0){  } //wait for the command to be sent
+    local_data = SSP1BUF;
+    SSP1BUF = 0;  // read status register command
+    while(SSP1STATbits.BF == 0){  } //wait for the command to be sent
+    local_data = SSP1BUF;
     
-    //send the address
-    SSP1BUF = 0;
-    SSP1BUF = 0;
-    SSP1BUF = 0;
-    SSP1BUF = 0;
+    PORTCbits.RC0 = 1;
+    local_data = 1;
     
-    SSP1BUF = output_data;
-    PORTCbits.RC0 = 1; 
     
+    
+    
+    
+    
+    
+//    SSP1CON1bits.WCOL = 0; //Clear collision bit in case there was a previous problem
+//    PORTCbits.RC0 = 0; 
+//    SSP1BUF = 5;  //send read status register command
+//    while (SSP1STATbits.BF || 1 == 0) {  }
+//    PORTCbits.RC0 = 1; 
+//    PORTCbits.RC0 = 0; 
+//    SSP1BUF = 2;  //send write command
+//    
+//    //send the address
+//    SSP1BUF = 0;
+//    SSP1BUF = 0;
+//    SSP1BUF = 0;
+//    SSP1BUF = 0;
+//    
+//    SSP1BUF = output_data;
+//    PORTCbits.RC0 = 1; 
+//    
 }
     
 /*********************************************************************
