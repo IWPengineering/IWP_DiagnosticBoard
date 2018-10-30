@@ -71,7 +71,7 @@ extern double __fpnormalize(double);
 #pragma intrinsic(__builtin_software_breakpoint)
 extern void __builtin_software_breakpoint(void);
 
-# 50 "C:\Program Files (x86)\Microchip\xc8\v1.44\include\pic18lf26k40.h"
+# 50 "C:\Program Files (x86)\Microchip\xc8\v1.44\include\pic18lf27k40.h"
 extern volatile unsigned char RX2PPS @ 0xE8D;
 
 asm("RX2PPS equ 0E8Dh");
@@ -13764,7 +13764,12 @@ float angle8 = 0;
 float angle9 = 0;
 float angle10 = 0;
 const int pulseWidthThreshold = 20;
-
+union EEData {
+int I_data;
+short long L_data;
+float F_data;
+};
+union EEData EEPromData;
 
 
 
@@ -13781,9 +13786,13 @@ int readWaterSensor(void);
 void delayMs(int ms);
 char BcdToDec(char val);
 void initSPI(void);
-void writeSPI(char);
 
-# 139
+void writeSPI(unsigned int output_data, unsigned short long EEaddress);
+void writeEEPromFloat(float output_data, unsigned short long EEaddress);
+char readSPI(unsigned int dummy, unsigned short long EEaddress);
+float readEEPromFloat(unsigned short long EEaddress);
+
+# 148
 void initialization(void) {
 
 
@@ -13819,34 +13828,169 @@ T3CONbits.ON = 1;
 initAdc();
 initSPI();
 
-# 218
+# 227
 }
 
-# 228
+# 237
 void initSPI(void){
-TRISCbits.TRISC4 = 0;
 TRISCbits.TRISC5 = 0;
+TRISCbits.TRISC3 = 0;
+TRISCbits.TRISC0 = 0;
 
-SSP1CON1bits.SSPEN = 1;
+
 SSP1CON1bits.CKP = 0;
+SSP1STATbits.CKE = 1;
 SSP1CON1bits.SSPM = 0;
 SSP1CON3bits.BOEN = 0;
 SSP1DATPPS = 20;
-RC3PPS = 16;
-RC5PPS = 15;
+RC3PPS = 15;
+RC5PPS = 16;
+SSP1CON1bits.SSPEN = 1;
+PORTCbits.RC0 = 1;
+
+
+
+
+}
+
+# 270
+void writeEEPromFloat(float output_data, unsigned short long EEaddress){
+
+EEPromData.F_data = output_data;
+unsigned int Data2 = (EEPromData.L_data >> 16)& 0xff;
+unsigned int Data1 = (EEPromData.L_data >> 8)& 0xff;
+unsigned int Data0 = EEPromData.L_data & 0xff;
+
+
+writeSPI(Data0, EEaddress);
+writeSPI(Data1, EEaddress + 1);
+writeSPI(Data2, EEaddress + 2);
+}
+
+# 294
+float readEEPromFloat(unsigned short long EEaddress){
+char Data2 = 0;
+char Data1 = 0;
+char Data0 = 0;
+
+
+Data0 = readSPI(0, EEaddress);
+Data1 = readSPI(0, EEaddress + 1);
+Data2 = readSPI(0, EEaddress + 2);
+
+EEPromData.L_data = Data2;
+EEPromData.L_data = EEPromData.L_data << 16;
+EEPromData.L_data = EEPromData.L_data | (Data1 << 8);
+EEPromData.L_data = EEPromData.L_data | Data0;
+
+return EEPromData.F_data;
+}
+
+# 329
+void writeSPI(unsigned int output_data, unsigned short long EEaddress){
+unsigned int local_data = 0;
+char AdrsMsb = 0;
+char AdrsMid = 0;
+char AdrsLsb = 0;
+
+
+AdrsMsb = (EEaddress >> 16)& 0xff;
+AdrsMid = (EEaddress >> 8)& 0xff;
+AdrsLsb = EEaddress & 0xff;
+
+PORTCbits.RC0 = 1;
+SSP1CON1bits.WCOL = 0;
 PORTCbits.RC0 = 0;
 
+SSP1BUF = 6;
+while(SSP1STATbits.BF == 0){ }
+PORTCbits.RC0 = 1;
+local_data = SSP1BUF;
 
+
+PORTCbits.RC0 = 0;
+SSP1BUF = 5;
+while(SSP1STATbits.BF == 0){ }
+local_data = SSP1BUF;
+local_data = 1;
+while (local_data == 1) {
+SSP1BUF = 0;
+while(SSP1STATbits.BF == 0){ }
+local_data = SSP1BUF;
+local_data = local_data & 1;
 }
+PORTCbits.RC0 = 1;
 
-# 251
-void writeSPI(char output_data){
-while(SSP1STATbits.BF==1){ }
-SSP1CON1bits.WCOL = 0;
+PORTCbits.RC0 = 0;
+
+SSP1BUF = 2;
+while(SSP1STATbits.BF == 0){ }
+local_data = SSP1BUF;
+
+SSP1BUF = AdrsMsb;
+while(SSP1STATbits.BF == 0){ }
+local_data = SSP1BUF;
+
+SSP1BUF = AdrsMid;
+while(SSP1STATbits.BF == 0){ }
+local_data = SSP1BUF;
+
+SSP1BUF = AdrsLsb;
+while(SSP1STATbits.BF == 0){ }
+local_data = SSP1BUF;
+
 SSP1BUF = output_data;
+while(SSP1STATbits.BF == 0){ }
+local_data = SSP1BUF;
+
+PORTCbits.RC0 = 1;
 }
 
-# 267
+# 402
+char readSPI(unsigned int dummy, unsigned short long EEaddress){
+char local_data = 0;
+char AdrsMsb = 0;
+char AdrsMid = 0;
+char AdrsLsb = 0;
+
+
+AdrsMsb = (EEaddress >> 16)& 0xff;
+AdrsMid = (EEaddress >> 8)& 0xff;
+AdrsLsb = EEaddress & 0xff;
+
+PORTCbits.RC0 = 1;
+SSP1CON1bits.WCOL = 0;
+
+
+PORTCbits.RC0 = 0;
+
+SSP1BUF = 3;
+while(SSP1STATbits.BF == 0){ }
+local_data = SSP1BUF;
+
+SSP1BUF = AdrsMsb;
+while(SSP1STATbits.BF == 0){ }
+local_data = SSP1BUF;
+
+SSP1BUF = AdrsMid;
+while(SSP1STATbits.BF == 0){ }
+local_data = SSP1BUF;
+
+SSP1BUF = AdrsLsb;
+while(SSP1STATbits.BF == 0){ }
+local_data = SSP1BUF;
+
+SSP1BUF = 00;
+while(SSP1STATbits.BF == 0){ }
+PORTCbits.RC0 = 1;
+
+local_data = SSP1BUF;
+return local_data;
+
+
+}
+
+# 455
 void delayMs(int ms) {
 int debug = 0;
 int end_count;
@@ -13864,10 +14008,10 @@ while(TMR0<end_count){
 debug = TMR0;
 }
 
-# 300
+# 488
 }
 
-# 409
+# 597
 int readWaterSensor(void)
 {
 int WaterPresent = 0;
@@ -13894,7 +14038,7 @@ WaterPresent = 1;
 return WaterPresent;
 }
 
-# 439
+# 627
 char BcdToDec(char val) {
 return ((val / 16 * 10) + (val % 16));
 }
@@ -13909,7 +14053,7 @@ int batteryLevelPin = 11;
 int TimeSinceLastHourCheck = 0;
 int hour = 0;
 
-# 462
+# 650
 void initAdc(void) {
 
 ADCON0bits.ADON = 0;
@@ -13962,11 +14106,12 @@ ADCON0bits.ADGO = 1;
 while (ADCON0bits.ADGO) {
 }
 unsigned int adcValue = ADRES;
-return adcValue;
+
 ADCON0bits.ADON = 0;
+return adcValue;
 }
 
-# 533
+# 722
 float getHandleAngle() {
 
 signed int xValue = readAdc(xAxis) - signedNumAdjustADC;
@@ -14003,10 +14148,36 @@ initialization();
 
 
 char EEPROMdata = 0;
-EEPROMdata = 0xAA;
-writeSPI(EEPROMdata);
-EEPROMdata = 7;
-writeSPI(EEPROMdata);
+
+TRISBbits.TRISB3 = 0;
+TRISBbits.TRISB4 = 0;
+
+while(1){
+float EEPromFloatData = 0;
+
+writeSPI(0, 0x100);
+writeSPI(0xaa, 0x101);
+writeSPI(0x55, 0x102);
+writeSPI(0x11, 0x103);
+writeSPI(0x33, 0x104);
+
+EEPROMdata = 0x70;
+
+EEPROMdata = readSPI(0, 0x103);
+EEPROMdata = readSPI(0, 0x101);
+EEPROMdata = readSPI(0, 0x100);
+EEPROMdata = readSPI(0, 0x102);
+EEPROMdata = readSPI(0, 0x104);
+
+writeEEPromFloat(12.345, 0x1000);
+writeEEPromFloat(12.34567, 0x1200);
+writeEEPromFloat(1234.56, 0x1100);
+
+EEPromFloatData = readEEPromFloat(0x1200);
+EEPromFloatData = readEEPromFloat(0x1000);
+EEPromFloatData = readEEPromFloat(0x1100);
+
+}
 
 
 
@@ -14024,7 +14195,7 @@ float anglePrevious = 0;
 float angleDelta = 0;
 int readWater = 0;
 
-# 594
+# 809
 PORTBbits.RB3 = 0;
 PORTBbits.RB4 = 0;
 while (1)

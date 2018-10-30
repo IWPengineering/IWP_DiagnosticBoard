@@ -76,8 +76,8 @@
 #include <stdlib.h>
 #include <math.h>
 #include <string.h>
-#include <pic18LF27K40.h>
-#include <pic18.h>
+#include <pic18lf27k40.h>
+//////#include <pic18.h>
 #include "Pin_Manager.h"
 
 //int __attribute__ ((space(eedata))) eeData; // Global variable located in EEPROM
@@ -104,7 +104,12 @@
     float angle9 = 0;
     float angle10 = 0;
     const int pulseWidthThreshold = 20; 
-    
+    union EEData {
+        int I_data;
+        short long L_data;
+        float F_data;
+    };
+    union EEData EEPromData; 
 // ****************************************************************************
 // *** Global Variables *******************************************************
 // ****************************************************************************
@@ -121,7 +126,11 @@ int readWaterSensor(void);
 void delayMs(int ms);
 char BcdToDec(char val);
 void initSPI(void);
-void writeSPI(char, long);
+//void writeSPI(char, int, int);
+void writeSPI(unsigned int output_data, unsigned short long EEaddress);
+void writeEEPromFloat(float output_data, unsigned short long EEaddress);
+char readSPI(unsigned int dummy, unsigned short long EEaddress);
+float readEEPromFloat(unsigned short long EEaddress);
 //int EEProm_Read_Int(int addr);
 //void EEProm_Read_Float(int ee_addr, void *obj_p);
 //void ClearWatchDogTimer(void);
@@ -233,7 +242,7 @@ void initSPI(void){
     
     SSP1CON1bits.CKP = 0; //Clock idle is low
     SSP1STATbits.CKE = 1; //Clock select bit is high
-    SSP1CON1bits.SSPM = 0; //SCLK = Fosc/4;
+    SSP1CON1bits.SSPM = 0; //SCLK = Fosc/4; (250khz)
     SSP1CON3bits.BOEN = 0; //Don't overwrite the data buffer with new stuff if its not been read yet
     SSP1DATPPS = 20; // This is Master Data input to C4
     RC3PPS = 15; // This is data clock to C3
@@ -246,16 +255,88 @@ void initSPI(void){
     
 }
 /*********************************************************************
- * Function: void writeSPI(char)
- * Input: the character to be sent
+ * Function: writeEEPromFloat(float output_data, long EEaddress)
+ * Input: output_data = float value (3 bytes) to be saved
+ *        EEaddress = address in EEPROM to write to (Max = 1FFD)
+ *                    NOTE:  The float will be written to three sequential 
+ *                           addresses starting with EEaddress
+ *        
  * Output: None
- * Overview: configures the SPI interface to the EEPROM
+ * Overview: This function calls writeSPI three times to save a float to 
+ *           the external EEPROM
  * Note: Pic Dependent
- * TestDate: not tested
+ * TestDate: Not tested
  ********************************************************************/
-void writeSPI(char output_data, long address){
-    //while(SSP1STATbits.BF == 0){   } // we could get stuck here
-    char local_data = 0;
+void writeEEPromFloat(float output_data, unsigned short long EEaddress){
+
+    EEPromData.F_data = output_data;
+    unsigned int Data2 = (EEPromData.L_data >> 16)& 0xff; // Data MSB
+    unsigned int Data1 = (EEPromData.L_data >> 8)& 0xff;
+    unsigned int Data0 = EEPromData.L_data & 0xff;        // Data LSB
+
+    // Write to external EEPROM
+    writeSPI(Data0, EEaddress); // LSB
+    writeSPI(Data1, EEaddress + 1); 
+    writeSPI(Data2, EEaddress + 2); //MSB
+}
+/*********************************************************************
+ * Function: float readEEPromFloat(long EEaddress)
+ * Input: EEaddress = address in EEPROM to read (Max = 1FFD)
+ *                    NOTE:  The float will be read from three sequential 
+ *                           addresses starting with EEaddress
+ *        
+ * Output: float reconstructed from the three bytes saved in EEPROM
+ * Overview: This function calls readSPI three times to read a float from 
+ *           the external EEPROM
+ * Note: Pic Dependent
+ * TestDate: Not tested
+ ********************************************************************/
+float readEEPromFloat(unsigned short long EEaddress){
+    char Data2 = 0;// Data MSB
+    char Data1 = 0;
+    char Data0 = 0;
+    
+    // Write to external EEPROM
+    Data0 = readSPI(0, EEaddress); // LSB
+    Data1 = readSPI(0, EEaddress + 1); 
+    Data2 = readSPI(0, EEaddress + 2);
+    
+    EEPromData.L_data = Data2;   
+    EEPromData.L_data = EEPromData.L_data << 16; 
+    EEPromData.L_data = EEPromData.L_data | (Data1 << 8);
+    EEPromData.L_data = EEPromData.L_data | Data0;
+   
+    return EEPromData.F_data; //Return the information as a float
+}
+
+/*********************************************************************
+ * Function: void writeSPI(int output_data, long EEaddress)
+ * Input: output_data = byte to be sent
+ *        EEaddress = address in EEPROM to write to (Max = 1FFF)
+ *        
+ * Output: None
+ * Overview: This function first makes sure the EEPROM is enabled for a Write
+ *           and that it is finished writing whatever may have been sent earlier
+ *           Then sends the address and data to the EEPROM to perform the write.
+ *           A single byte write takes about 600usec.  However, if you call the 
+ *           function again right away, it will take longer since the EEPROM 
+ *           will still be in the process of writing
+ * ** Programming Note:  For some reason the PIC messed up the LSByte of the long
+ *                       address if the output_data was a char rather than an int
+ * Note: Pic Dependent
+ * TestDate: 10/24/2018 RKF
+ ********************************************************************/
+void writeSPI(unsigned int output_data, unsigned short long EEaddress){
+    unsigned int local_data = 0;
+    char AdrsMsb = 0;
+    char AdrsMid = 0;
+    char AdrsLsb = 0;
+    
+    // Parse the address into three bytes
+    AdrsMsb = (EEaddress >> 16)& 0xff;
+    AdrsMid = (EEaddress >> 8)& 0xff;
+    AdrsLsb = EEaddress & 0xff;   
+    
     PORTCbits.RC0 = 1; 
     SSP1CON1bits.WCOL = 0; //Clear collision bit in case there was a previous problem
     PORTCbits.RC0 = 0; 
@@ -263,48 +344,101 @@ void writeSPI(char output_data, long address){
     SSP1BUF = 6;  // send Write enable command
     while(SSP1STATbits.BF == 0){  } //wait for the command to be sent
     PORTCbits.RC0 = 1;
-    local_data = SSP1BUF;
+    local_data = SSP1BUF; // we don't care about this, just getting ready for the next write
     
+    // See if the EEPROM is ready for another data byte
     PORTCbits.RC0 = 0; 
     SSP1BUF = 5;  // read status register command
     while(SSP1STATbits.BF == 0){  } //wait for the command to be sent
     local_data = SSP1BUF;
     local_data = 1;
-    while (local_data == 1) {
+    while (local_data == 1) { // Keep reading the contents of the Status Register until it says it is ready for a new write
         SSP1BUF = 0;  // garbage
         while(SSP1STATbits.BF == 0){  } //wait for the command to be sent
         local_data = SSP1BUF;
-        local_data = local_data & 1;
+        local_data = local_data & 1; //The LSB is LOW when the EEPROM is ready for more data
     }
     PORTCbits.RC0 = 1;  
-    
+    // Here is where we actually do the WRITING (Address MSB-Middle-LSB, DATA, )
     PORTCbits.RC0 = 0;
-    SSP1BUF = 2;  // actually write data
+    
+    SSP1BUF = 2;  // Write Command
     while(SSP1STATbits.BF == 0){  } //wait for the command to be sent
     local_data = SSP1BUF;
-    
-    SSP1BUF = 1;  // Msb address
+  
+    SSP1BUF = AdrsMsb;  // Msb address
     while(SSP1STATbits.BF == 0){  } //wait for the command to be sent
     local_data = SSP1BUF;
 
-    SSP1BUF = 2;  // middle address
+    SSP1BUF = AdrsMid;  // middle address
     while(SSP1STATbits.BF == 0){  } //wait for the command to be sent
     local_data = SSP1BUF;
     
-    SSP1BUF = 3;  // lsb address
+    SSP1BUF = AdrsLsb;  // lsb address
     while(SSP1STATbits.BF == 0){  } //wait for the command to be sent
     local_data = SSP1BUF;
     
-    SSP1BUF = 0xaa;  // data
+    SSP1BUF = output_data;  // data
     while(SSP1STATbits.BF == 0){  } //wait for the command to be sent
     local_data = SSP1BUF;
     
-    PORTCbits.RC0 = 1;  // CS high
-    
+    PORTCbits.RC0 = 1;  // CS high  
 }
 
-void readSPI(char output_data, long address){
+/*********************************************************************
+ * Function: char readSPI(int dummy, long EEaddress)
+ * Input: dummy = For some reason the LSByte of the address is read as
+ *                0x48 if you don't have an int sent to the function first.
+ *                Just send any number it is not used
+ *        EEaddress = address you want to read (max is 1FFF)   
+ * Output: Byte read from the specified EEPROM address
+ * Overview: This function reads a single byte from the external EEPROM 
+ *           connected with the SPI interface and returns it.
+ * ** Programming Note:  For some reason the PIC messed up the LSByte of the long
+ *                       address if the output_data was a char rather than an int
+ * Note: Pic Dependent
+ * TestDate: 10/24/2018 RKF
+ ********************************************************************/
+char readSPI(unsigned int dummy, unsigned short long EEaddress){
+    char local_data = 0;
+    char AdrsMsb = 0;
+    char AdrsMid = 0;
+    char AdrsLsb = 0;
     
+    // Parse the address into three bytes
+    AdrsMsb = (EEaddress >> 16)& 0xff;
+    AdrsMid = (EEaddress >> 8)& 0xff;
+    AdrsLsb = EEaddress & 0xff;  
+    
+    PORTCbits.RC0 = 1; 
+    SSP1CON1bits.WCOL = 0; //Clear collision bit in case there was a previous problem
+    
+    // Here is where we actually read the data (Address MSB-Middle-LSB, data )
+    PORTCbits.RC0 = 0; 
+    
+    SSP1BUF = 3;  // send READ command
+    while(SSP1STATbits.BF == 0){  } //wait for the command to be sent
+    local_data = SSP1BUF; // we don't care about this, just getting ready for the next write
+  
+    SSP1BUF = AdrsMsb;  // Msb address
+    while(SSP1STATbits.BF == 0){  } //wait for the command to be sent
+    local_data = SSP1BUF;
+
+    SSP1BUF = AdrsMid;  // middle address
+    while(SSP1STATbits.BF == 0){  } //wait for the command to be sent
+    local_data = SSP1BUF;
+    
+    SSP1BUF = AdrsLsb;  // lsb address
+    while(SSP1STATbits.BF == 0){  } //wait for the command to be sent
+    local_data = SSP1BUF;
+    
+    SSP1BUF = 00;  // garbage byte so we can read the response
+    while(SSP1STATbits.BF == 0){  } //wait for the command to be sent
+    PORTCbits.RC0 = 1;  // CS high
+    
+    local_data = SSP1BUF;
+    return local_data;
+        
     
 }
     
@@ -565,8 +699,9 @@ int readAdc(int pin) //check with accelerometer
     while (ADCON0bits.ADGO) { //ADGO = 0 means that conversion is finished
     }
     unsigned int adcValue = ADRES;  //From ADC result register
-    return adcValue;
+    
     ADCON0bits.ADON = 0; // Turn off ADC   
+    return adcValue;
 }
 
 
@@ -625,20 +760,29 @@ void main(void) {
     TRISBbits.TRISB4 = 0;
     
     while(1){
-        EEPROMdata = 0xAA;   //1010 1010
-        writeSPI(EEPROMdata, 0);
-        EEPROMdata = 0xf;    //0000 1111
-        writeSPI(EEPROMdata, 0);
-        EEPROMdata = 0x70;   //0111 0000
-        writeSPI(EEPROMdata, 0);
+        float EEPromFloatData = 0;
         
-//        if (PORTBbits.RB3) {
-//            PORTBbits.RB3 = 0;
-//            delayMs(1000);
-//        }else{
-//            PORTBbits.RB3 = 1;
-//            delayMs(1000);
-//        }
+        writeSPI(0, 0x100);
+        writeSPI(0xaa, 0x101);
+        writeSPI(0x55, 0x102);
+        writeSPI(0x11, 0x103);
+        writeSPI(0x33, 0x104);
+   
+        EEPROMdata = 0x70;   //0111 0000        
+ // Now let's try to read things back
+        EEPROMdata = readSPI(0, 0x103);
+        EEPROMdata = readSPI(0, 0x101);
+        EEPROMdata = readSPI(0, 0x100);
+        EEPROMdata = readSPI(0, 0x102);
+        EEPROMdata = readSPI(0, 0x104);
+// Check the Float Functions
+        writeEEPromFloat(12.345, 0x1000);
+        writeEEPromFloat(12.34567, 0x1200);
+        writeEEPromFloat(1234.56, 0x1100);
+        
+        EEPromFloatData = readEEPromFloat(0x1200);
+        EEPromFloatData = readEEPromFloat(0x1000);
+        EEPromFloatData = readEEPromFloat(0x1100);
         
     }
     
