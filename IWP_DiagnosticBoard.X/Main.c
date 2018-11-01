@@ -771,6 +771,7 @@ void main(void) {
         EEPROMdata = 0x70;   //0111 0000        
  // Now let's try to read things back
         EEPROMdata = readSPI(0, 0x103);
+        EEPROMdata = readSPI(0, 0x103);
         EEPROMdata = readSPI(0, 0x101);
         EEPROMdata = readSPI(0, 0x100);
         EEPROMdata = readSPI(0, 0x102);
